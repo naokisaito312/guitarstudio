@@ -346,6 +346,44 @@
             updateButtonUI('B');
             stopLoopCheck();
         }
+        
+        // --- キーボード操作の制御 ---
+        window.addEventListener('keydown', function(event) {
+            // URL入力欄（input）にフォーカスがある場合は、キーボードショートカットを無効化する
+            if (document.activeElement.tagName === 'INPUT') {
+                return;
+            }
+        
+            switch (event.key) {
+                case ' ': // スペースキー
+                    event.preventDefault(); // 画面のスクロールを防止
+                    togglePlay();
+                    break;
+                    
+                case 'ArrowLeft': // 左矢印キー
+                    event.preventDefault();
+                    skip(-10);
+                    break;
+                    
+                case 'ArrowRight': // 右矢印キー
+                    event.preventDefault();
+                    skip(10);
+                    break;
+                    
+                case 'a': // Aキー (小文字・大文字両対応)
+                case 'A':
+                    handleButtonClick('A');
+                    break;
+                    
+                case 'b': // Bキー (小文字・大文字両対応)
+                case 'B':
+                    handleButtonClick('B');
+                    break;
+                    
+                default:
+                    return; // その他のキーは何もしない
+            }
+        });
     </script>
 </body>
 </html>
