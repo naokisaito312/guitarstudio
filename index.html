@@ -97,13 +97,16 @@
         
         /* 共通ボタン（フットスイッチ・頑丈なメタルボタン風） */
         .btn {
-            width: 140px; /* ★ ボタンの横幅を140pxに完全固定（お好みで調整してください） */
-            height: 50px; /* ★ 縦幅も統一して正方形に近い綺麗な長方形に */
-            padding: 0;   /* 横幅を固定するため、内側の余白(padding)はリセット */
-            font-size: 13px; /* 固定幅に文字が収まりやすいよう、少しだけ小さく調整 */
+            width: 140px;
+            height: 50px;
+            padding: 0;
+            /* 1行目（POINT Aなどの文字）の基本スタイル */
+            font-size: 11px;       /* 1行目を一回り小さく */
+            color: #888;           /* 普段は少し控えめなグレーに */
+            letter-spacing: 1px;   /* 文字の間隔を少し広げて機材の印字っぽく */
+            
             font-weight: bold;
             font-family: inherit;
-            color: #aaa;
             background: linear-gradient(180deg, #3a3a45 0%, #25252c 100%);
             border: 1px solid #4a4a57;
             border-radius: 6px;
@@ -112,18 +115,25 @@
             transition: all 0.1s ease;
             user-select: none;
             text-transform: uppercase;
-            
-            /* 文字がボタンからはみ出さないように中央配置 */
             display: inline-flex;
+            flex-direction: column; /* 上下2行に並びやすくする */
             justify-content: center;
             align-items: center;
             text-align: center;
-            line-height: 1.3; /* 行間を少し狭めてキュッと引き締める（標準は1.5〜2.0程度） */
+            line-height: 1.4;
         }
+        
         .btn:hover {
-            color: #fff;
+            color: #bbb;
             background: linear-gradient(180deg, #454552 0%, #2d2d36 100%);
         }
+        
+        .btn-status {
+            font-size: 12px;       /* 2行目の文字サイズ */
+            margin-top: 2px;       /* 1行目との隙間を微調整 */
+            font-family: 'Consolas', 'Courier New', monospace; /* デジタル数字感を強調 */
+        }
+        
         .btn:active {
             transform: translateY(2px);
             box-shadow: 0 1px 2px rgba(0,0,0,0.5);
@@ -137,9 +147,8 @@
         /* A/B点 設定時のLED点灯エフェクト */
         .ab-btn.active {
             background: linear-gradient(180deg, #1e3d2f 0%, #11241b 100%);
-            color: #00ffcc;
+            color: #a0ffd0;        /* 設定時は1行目も少し緑がかった薄い色に */
             border-color: #00ffcc;
-            text-shadow: 0 0 5px rgba(0,255,204,0.6);
             box-shadow: 0 0 12px rgba(0,255,204,0.3), inset 0 1px 0 rgba(255,255,255,0.1);
         }
         .ab-btn.active:hover {
@@ -168,14 +177,14 @@
                 onmouseup="endPress('A')" 
                 onmouseleave="cancelPress('A')"
                 ontouchstart="startPress('A')" 
-                ontouchend="endPress('A')">A点<br>未設定</button>
+                ontouchend="endPress('A')">A点<br><span class="btn-status" style="color: #666;">--:--</span></button>
                 
         <button class="btn ab-btn" id="btnB" 
                 onmousedown="startPress('B')" 
                 onmouseup="endPress('B')" 
                 onmouseleave="cancelPress('B')"
                 ontouchstart="startPress('B')" 
-                ontouchend="endPress('B')">B点<br>未設定</button>
+                ontouchend="endPress('B')">B点<br><span class="btn-status" style="color: #666;">--:--</span></button>
     </div>
 
     <script>
@@ -335,12 +344,14 @@
         function updateButtonUI(type) {
             var btn = document.getElementById('btn' + type);
             var val = (type === 'A') ? pointA : pointB;
-
+        
             if (val === null) {
-                btn.innerHTML = type + "点" + "<br>未設定";
+                // 未設定時は下段を少し暗いグレーに
+                btn.innerHTML = type + "点" + "<br><span class='btn-status' style='color: #666;'>--:--</span>";
                 btn.classList.remove('active');
             } else {
-                btn.innerHTML = type + "点" + "<br>" + formatTime(val);
+                // 設定時は下段がネオンカラー（#00ffcc）で目立つように
+                btn.innerHTML = type + "点" + "<br><span class='btn-status' style='color: #00ffcc; font-weight: bold; font-size: 14px;'>" + formatTime(val) + "</span>";
                 btn.classList.add('active');
             }
         }
