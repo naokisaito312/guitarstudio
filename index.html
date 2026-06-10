@@ -97,8 +97,10 @@
         
         /* 共通ボタン（フットスイッチ・頑丈なメタルボタン風） */
         .btn {
-            padding: 14px 28px;
-            font-size: 14px;
+            width: 140px; /* ★ ボタンの横幅を140pxに完全固定（お好みで調整してください） */
+            height: 50px; /* ★ 縦幅も統一して正方形に近い綺麗な長方形に */
+            padding: 0;   /* 横幅を固定するため、内側の余白(padding)はリセット */
+            font-size: 13px; /* 固定幅に文字が収まりやすいよう、少しだけ小さく調整 */
             font-weight: bold;
             font-family: inherit;
             color: #aaa;
@@ -109,7 +111,13 @@
             box-shadow: 0 4px 6px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.05);
             transition: all 0.1s ease;
             user-select: none;
-            text-transform: uppercase; /* 英字を大文字にして機材っぽく */
+            text-transform: uppercase;
+            
+            /* 文字がボタンからはみ出さないように中央配置 */
+            display: inline-flex;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
         }
         .btn:hover {
             color: #fff;
@@ -120,23 +128,12 @@
             box-shadow: 0 1px 2px rgba(0,0,0,0.5);
         }
         
-        /* 再生・一時停止ボタン（インジケーター赤） */
-        #playPauseBtn {
-            border-color: #ff3b30;
-            color: #ff8882;
-        }
-        #playPauseBtn:hover {
-            background: linear-gradient(180deg, #5e2320 0%, #3a1412 100%);
-            color: #ff3b30;
-            box-shadow: 0 0 10px rgba(255,59,48,0.4);
-        }
-        
-        /* Aボタン、Bボタン（エフェクターのチャンネルON風） */
+        /* Aボタン、Bボタンの追加スタイル */
         .ab-btn {
-            min-width: 140px;
+            /* width: 140px; を削除（上の.btnで一括固定されたため、幅の個別指定は不要になりました） */
             position: relative;
         }
-        /* A/B点 設定時のLED点灯エフェクト（ここがキモです） */
+        /* A/B点 設定時のLED点灯エフェクト */
         .ab-btn.active {
             background: linear-gradient(180deg, #1e3d2f 0%, #11241b 100%);
             color: #00ffcc;
