@@ -3,9 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>YouTube Controller App</title>
+    <title>YouTube AB-Loop Controller</title>
     <style>
-        /* 全体のレイアウト調整 */
         body {
             margin: 0;
             padding: 20px;
@@ -16,7 +15,6 @@
             align-items: center;
         }
 
-        /* 動画ID入力エリア */
         .input-container {
             margin-bottom: 20px;
             width: 70vw;
@@ -44,20 +42,17 @@
             background-color: #cc0000;
         }
 
-        /* プレイヤーのラッパー（画面横幅の7割に設定） */
         .video-container {
             width: 70vw;
-            /* 16:9 のアスペクト比を維持するための設定 */
             position: relative;
             padding-top: calc(70vw * 9 / 16); 
-            max-height: 70vh; /* 縦に大きくなりすぎないよう制限 */
+            max-height: 70vh;
             background-color: #000;
             box-shadow: 0 4px 10px rgba(0,0,0,0.15);
             border-radius: 8px;
             overflow: hidden;
         }
 
-        /* YouTubeの実際のIFrame（コンテナいっぱいに広げる） */
         #player {
             position: absolute;
             top: 0;
@@ -66,7 +61,45 @@
             height: 100%;
         }
 
-        /* コントロールボタンの配置 */
+        /* ループ設定コントロールのスタイル */
+        .loop-container {
+            margin-top: 15px;
+            width: 70vw;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: #fff;
+            padding: 15px 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            box-sizing: border-box;
+        }
+        .loop-box {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .loop-btn {
+            padding: 8px 16px;
+            font-size: 14px;
+            font-weight: bold;
+            background-color: #6c757d;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .loop-btn:hover { background-color: #5a6268; }
+        
+        /* ループ有効化スイッチ */
+        .switch-box {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: bold;
+            color: #333;
+        }
+
         .controls {
             margin-top: 20px;
             display: flex;
@@ -75,7 +108,6 @@
             align-items: center;
         }
 
-        /* ボタンの共通スタイリング */
         .btn {
             padding: 12px 24px;
             font-size: 16px;
@@ -92,29 +124,48 @@
             background-color: #eef2f7;
             transform: translateY(-1px);
         }
-        .btn:active {
-            transform: translateY(1px);
-        }
-        /* 再生・一時停止ボタンを目立たせる */
         #playPauseBtn {
             background-color: #007bff;
             color: white;
             border: none;
         }
-        #playPauseBtn:hover {
-            background-color: #0056b3;
+        #playPauseBtn:hover { background-color: #0056b3; }
+        
+        /* 時間表示用 */
+        .time-display {
+            font-size: 14px;
+            color: #555;
+            min-width: 80px;
+            text-align: center;
         }
     </style>
 </head>
 <body>
 
     <div class="input-container">
-        <input type="text" id="videoUrl" placeholder="YouTubeの動画URL または 動画ID を入力（例: dQw4w9WgXcQ）">
+        <input type="text" id="videoUrl" placeholder="YouTubeの動画URL または 動画ID を入力">
         <button onclick="changeVideo()">読み込み</button>
     </div>
 
     <div class="video-container">
         <div id="player"></div>
+    </div>
+
+    <div class="loop-container">
+        <div class="loop-box">
+            <button class="loop-btn" onclick="setPoint('A')">A点を設定 (開始)</button>
+            <span class="time-display" id="displayA">未設定</span>
+        </div>
+        
+        <div class="switch-box">
+            <input type="checkbox" id="loopEnabled" onchange="toggleLoopCheckbox()">
+            <label for="loopEnabled">ABループを有効化</label>
+        </div>
+
+        <div class="loop-box">
+            <button class="loop-btn" onclick="setPoint('B')">B点を設定 (終了)</button>
+            <span class="time-display" id="displayB">未設定</span>
+        </div>
     </div>
 
     <div class="controls">
@@ -124,23 +175,25 @@
     </div>
 
     <script>
-        // YouTube IFrame Player API の読み込み
         var tag = document.createElement('script');
         tag.src = "https://www.youtube.com/iframe_api";
         var firstScriptTag = document.getElementsByTagName('script')[0];
         firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
 
         var player;
-        // 初期表示する動画ID（デフォルトで公式のサンプル動画などを設定しておくと便利です）
         var defaultVideoId = 'dQw4w9WgXcQ'; 
 
-        // APIの準備ができたら自動的に呼ばれる関数
+        // ループ制御用の変数
+        var pointA = null;
+        var pointB = null;
+        var loopTimer = null;
+
         function onYouTubeIframeAPIReady() {
             player = new YT.Player('player', {
                 videoId: defaultVideoId,
                 playerVars: {
                     'playsinline': 1,
-                    'controls': 1, // YouTube標準のコントロールも表示（不要なら0に）
+                    'controls': 1,
                     'rel': 0
                 },
                 events: {
@@ -149,10 +202,8 @@
             });
         }
 
-        // 再生・一時停止の切り替え
         function togglePlay() {
             if (!player || typeof player.getPlayerState !== 'function') return;
-            
             var state = player.getPlayerState();
             if (state == YT.PlayerState.PLAYING) {
                 player.pauseVideo();
@@ -161,50 +212,130 @@
             }
         }
 
-        // 10秒送り / 10秒戻し
         function skip(seconds) {
             if (!player || typeof player.getCurrentTime !== 'function') return;
-            
             var currentTime = player.getCurrentTime();
             var duration = player.getDuration();
             var newTime = currentTime + seconds;
 
-            // 再生時間を範囲内に収める
             if (newTime < 0) newTime = 0;
             if (newTime > duration) newTime = duration;
 
             player.seekTo(newTime, true);
         }
 
-        // 入力されたURLやIDから動画を切り替える
         function changeVideo() {
             var input = document.getElementById('videoUrl').value.trim();
             if (!input) return;
-
             var videoId = extractVideoId(input);
             
             if (videoId && player && typeof player.loadVideoById === 'function') {
                 player.loadVideoById(videoId);
+                resetLoopSettings(); // 動画が変わったらループ設定をリセット
             } else {
-                alert('有効なYouTubeのURLまたは動画IDが見つかりませんでした。');
+                alert('有効なYouTubeのURLまたは動画IDが見てつかりませんでした。');
             }
         }
 
-        // URLから動画ID（11桁）を抽出する補助関数
         function extractVideoId(url) {
             var regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
             var match = url.match(regExp);
-            return (match && match[2].length == 11) ? match[2] : url; // マッチしなければ入力値をそのままIDとして扱う
+            return (match && match[2].length == 11) ? match[2] : url;
         }
 
-        // 状態変化を監視（ボタンのテキストを状態に合わせたい場合などに拡張可能）
         function onPlayerStateChange(event) {
             var btn = document.getElementById('playPauseBtn');
             if (event.data == YT.PlayerState.PLAYING) {
                 btn.textContent = "一時停止";
+                startLoopCheck(); // 再生が始まったら時間監視を開始
             } else {
                 btn.textContent = "再生";
+                stopLoopCheck();  // 停止したら監視も止める
             }
+        }
+
+        // --- ここからABループ用のロジック ---
+
+        // 現在の再生時間をA点またはB点に設定
+        function setPoint(type) {
+            if (!player || typeof player.getCurrentTime !== 'function') return;
+            var currentTime = player.getCurrentTime();
+            
+            if (type === 'A') {
+                pointA = currentTime;
+                document.getElementById('displayA').textContent = formatTime(pointA);
+            } else if (type === 'B') {
+                pointB = currentTime;
+                document.getElementById('displayB').textContent = formatTime(pointB);
+            }
+
+            // AとBが両方設定され、かつA < B の場合は自動でループにチェックを入れる
+            if (pointA !== null && pointB !== null && pointA < pointB) {
+                document.getElementById('loopEnabled').checked = true;
+            }
+        }
+
+        // ループの有効・無効チェックボックスが切り替わった時
+        function toggleLoopCheckbox() {
+            var isChecked = document.getElementById('loopEnabled').checked;
+            if (isChecked) {
+                if (pointA === null || pointB === null) {
+                    alert('A点とB点の両方を設定してください。');
+                    document.getElementById('loopEnabled').checked = false;
+                    return;
+                }
+                if (pointA >= pointB) {
+                    alert('B点はA点より後ろの時間に設定してください。');
+                    document.getElementById('loopEnabled').checked = false;
+                    return;
+                }
+                // 有効化した瞬間に、もし現在地がB点より先ならA点にジャンプ
+                if (player && player.getCurrentTime() > pointB) {
+                    player.seekTo(pointA, true);
+                }
+            }
+        }
+
+        // 秒数を「分:秒.ミリ秒」の形式に変換する関数
+        function formatTime(seconds) {
+            var m = Math.floor(seconds / 60);
+            var s = Math.floor(seconds % 60);
+            return m + ":" + (s < 10 ? "0" : "") + s;
+        }
+
+        // 再生時間の監視を開始 (0.1秒ごとにチェック)
+        function startLoopCheck() {
+            if (loopTimer) clearInterval(loopTimer);
+            
+            loopTimer = setInterval(function() {
+                var isEnabled = document.getElementById('loopEnabled').checked;
+                if (!isEnabled || pointA === null || pointB === null) return;
+
+                var currentTime = player.getCurrentTime();
+                
+                // 現在の再生時間がB点を超えたら、A点へ巻き戻す
+                if (currentTime >= pointB) {
+                    player.seekTo(pointA, true);
+                }
+            }, 100); // 100ミリ秒ごとにチェック（精度を上げたい場合は数字を小さく）
+        }
+
+        // 再生時間の監視を停止
+        function stopLoopCheck() {
+            if (loopTimer) {
+                clearInterval(loopTimer);
+                loopTimer = null;
+            }
+        }
+
+        // 新しい動画が読み込まれた時に設定を初期化する
+        function resetLoopSettings() {
+            pointA = null;
+            pointB = null;
+            document.getElementById('loopEnabled').checked = false;
+            document.getElementById('displayA').textContent = "未設定";
+            document.getElementById('displayB').textContent = "未設定";
+            stopLoopCheck();
         }
     </script>
 </body>
