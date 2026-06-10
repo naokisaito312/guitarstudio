@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>YouTube Controller App</title>
+    <style>
+        /* 全体のレイアウト調整 */
+        body {
+            margin: 0;
+            padding: 20px;
+            background-color: #f0f2f5;
+            font-family: 'Helvetica Neue', Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        /* 動画ID入力エリア */
+        .input-container {
+            margin-bottom: 20px;
+            width: 70vw;
+            display: flex;
+            gap: 10px;
+        }
+        .input-container input {
+            flex: 1;
+            padding: 10px;
+            font-size: 16px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        .input-container button {
+            padding: 10px 20px;
+            font-size: 16px;
+            background-color: #ff0000;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        .input-container button:hover {
+            background-color: #cc0000;
+        }
+
+        /* プレイヤーのラッパー（画面横幅の7割に設定） */
+        .video-container {
+            width: 70vw;
+            /* 16:9 のアスペクト比を維持するための設定 */
+            position: relative;
+            padding-top: calc(70vw * 9 / 16); 
+            max-height: 70vh; /* 縦に大きくなりすぎないよう制限 */
+            background-color: #000;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        /* YouTubeの実際のIFrame（コンテナいっぱいに広げる） */
+        #player {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+
+        /* コントロールボタンの配置 */
+        .controls {
+            margin-top: 20px;
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            align-items: center;
+        }
+
+        /* ボタンの共通スタイリング */
+        .btn {
+            padding: 12px 24px;
+            font-size: 16px;
+            font-weight: bold;
+            color: #333;
+            background-color: #fff;
+            border: 1px solid #ddd;
+            border-radius: 30px;
+            cursor: pointer;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            transition: all 0.2s ease;
+        }
+        .btn:hover {
+            background-color: #eef2f7;
+            transform: translateY(-1px);
+        }
+        .btn:active {
+            transform: translateY(1px);
+        }
+        /* 再生・一時停止ボタンを目立たせる */
+        #playPauseBtn {
+            background-color: #007bff;
+            color: white;
+            border: none;
+        }
+        #playPauseBtn:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="input-container">
+        <input type="text" id="videoUrl" placeholder="YouTubeの動画URL または 動画ID を入力（例: dQw4w9WgXcQ）">
+        <button onclick="changeVideo()">読み込み</button>
+    </div>
+
+    <div class="video-container">
+        <div id="player"></div>
+    </div>
+
+    <div class="controls">
+        <button class="btn" onclick="skip(-10)">◀ 10秒戻す</button>
+        <button class="btn" id="playPauseBtn" onclick="togglePlay()">再生 / 一時停止</button>
+        <button class="btn" onclick="skip(10)">10秒進める ▶</button>
+    </div>
+
+    <script>
+        // YouTube IFrame Player API の読み込み
+        var tag = document.createElement('script');
+        tag.src = "https://www.youtube.com/iframe_api";
+        var firstScriptTag = document.getElementsByTagName('script')[0];
+        firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+
+        var player;
+        // 初期表示する動画ID（デフォルトで公式のサンプル動画などを設定しておくと便利です）
+        var defaultVideoId = 'dQw4w9WgXcQ'; 
+
+        // APIの準備ができたら自動的に呼ばれる関数
+        function onYouTubeIframeAPIReady() {
+            player = new YT.Player('player', {
+                videoId: defaultVideoId,
+                playerVars: {
+                    'playsinline': 1,
+                    'controls': 1, // YouTube標準のコントロールも表示（不要なら0に）
+                    'rel': 0
+                },
+                events: {
+                    'onStateChange': onPlayerStateChange
+                }
+            });
+        }
+
+        // 再生・一時停止の切り替え
+        function togglePlay() {
+            if (!player || typeof player.getPlayerState !== 'function') return;
+            
+            var state = player.getPlayerState();
+            if (state == YT.PlayerState.PLAYING) {
+                player.pauseVideo();
+            } else {
+                player.playVideo();
+            }
+        }
+
+        // 10秒送り / 10秒戻し
+        function skip(seconds) {
+            if (!player || typeof player.getCurrentTime !== 'function') return;
+            
+            var currentTime = player.getCurrentTime();
+            var duration = player.getDuration();
+            var newTime = currentTime + seconds;
+
+            // 再生時間を範囲内に収める
+            if (newTime < 0) newTime = 0;
+            if (newTime > duration) newTime = duration;
+
+            player.seekTo(newTime, true);
+        }
+
+        // 入力されたURLやIDから動画を切り替える
+        function changeVideo() {
+            var input = document.getElementById('videoUrl').value.trim();
+            if (!input) return;
+
+            var videoId = extractVideoId(input);
+            
+            if (videoId && player && typeof player.loadVideoById === 'function') {
+                player.loadVideoById(videoId);
+            } else {
+                alert('有効なYouTubeのURLまたは動画IDが見つかりませんでした。');
+            }
+        }
+
+        // URLから動画ID（11桁）を抽出する補助関数
+        function extractVideoId(url) {
+            var regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
+            var match = url.match(regExp);
+            return (match && match[2].length == 11) ? match[2] : url; // マッチしなければ入力値をそのままIDとして扱う
+        }
+
+        // 状態変化を監視（ボタンのテキストを状態に合わせたい場合などに拡張可能）
+        function onPlayerStateChange(event) {
+            var btn = document.getElementById('playPauseBtn');
+            if (event.data == YT.PlayerState.PLAYING) {
+                btn.textContent = "一時停止";
+            } else {
+                btn.textContent = "再生";
+            }
+        }
+    </script>
+</body>
+</html>
