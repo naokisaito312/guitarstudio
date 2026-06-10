@@ -167,14 +167,14 @@
                 onmouseup="endPress('A')" 
                 onmouseleave="cancelPress('A')"
                 ontouchstart="startPress('A')" 
-                ontouchend="endPress('A')">A点 (未設定)</button>
+                ontouchend="endPress('A')">POINT A<br>(--)</button>
                 
         <button class="btn ab-btn" id="btnB" 
                 onmousedown="startPress('B')" 
                 onmouseup="endPress('B')" 
                 onmouseleave="cancelPress('B')"
                 ontouchstart="startPress('B')" 
-                ontouchend="endPress('B')">B点 (未設定)</button>
+                ontouchend="endPress('B')">POINT B<br>(--)</button>
     </div>
 
     <script>
@@ -336,10 +336,10 @@
             var val = (type === 'A') ? pointA : pointB;
 
             if (val === null) {
-                btn.textContent = type + "点 (未設定)";
+                btn.innerHTML = "POINT " + type + "<br>(--)";
                 btn.classList.remove('active');
             } else {
-                btn.textContent = type + "点 (" + formatTime(val) + ")";
+                btn.innerHTML = "POINT " + type + "<br>(" + formatTime(val) + ")";
                 btn.classList.add('active');
             }
         }
