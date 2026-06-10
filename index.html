@@ -337,10 +337,10 @@
             var val = (type === 'A') ? pointA : pointB;
 
             if (val === null) {
-                btn.innerHTML = "POINT " + type + "<br>(--)";
+                btn.innerHTML = type + "点" + "<br>未設定";
                 btn.classList.remove('active');
             } else {
-                btn.innerHTML = "POINT " + type + "<br>(" + formatTime(val) + ")";
+                btn.innerHTML = type + "点" + "<br>" + formatTime(val);
                 btn.classList.add('active');
             }
         }
