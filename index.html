@@ -101,7 +101,7 @@
             height: 50px;
             padding: 0;
             /* 1行目の基本スタイル */
-            font-size: 12px;
+            font-size: 14px;
             color: #bbb;           /* 普段は少し控えめなグレーに */
             letter-spacing: 1px;   /* 文字の間隔を少し広げて機材の印字っぽく */
             
@@ -129,7 +129,7 @@
         }
         
         .btn-status {
-            font-size: 11px;       /* 2行目の文字サイズ */
+            font-size: 12px;       /* 2行目の文字サイズ */
             margin-top: 2px;       /* 1行目との隙間を微調整 */
             font-family: 'Consolas', 'Courier New', monospace; /* デジタル数字感を強調 */
         }
@@ -168,23 +168,23 @@
     </div>
 
     <div class="controls">
-        <button class="btn" onclick="skip(-10)">◀ 10秒戻す</button>
-        <button class="btn" id="playPauseBtn" onclick="togglePlay()">再生 / 一時停止</button>
-        <button class="btn" onclick="skip(10)">10秒進める ▶</button>
+        <button class="btn" onclick="skip(-10)">-10 sec</button>
+        <button class="btn" id="playPauseBtn" onclick="togglePlay()">Play / Pause</button>
+        <button class="btn" onclick="skip(10)">+10 sec</button>
         
         <button class="btn ab-btn" id="btnA" 
                 onmousedown="startPress('A')" 
                 onmouseup="endPress('A')" 
                 onmouseleave="cancelPress('A')"
                 ontouchstart="startPress('A')" 
-                ontouchend="endPress('A')">A点<br><span class="btn-status" style="color: #666;">--:--</span></button>
+                ontouchend="endPress('A')">A<br><span class="btn-status" style="color: #666;">--:--</span></button>
                 
         <button class="btn ab-btn" id="btnB" 
                 onmousedown="startPress('B')" 
                 onmouseup="endPress('B')" 
                 onmouseleave="cancelPress('B')"
                 ontouchstart="startPress('B')" 
-                ontouchend="endPress('B')">B点<br><span class="btn-status" style="color: #666;">--:--</span></button>
+                ontouchend="endPress('B')">B<br><span class="btn-status" style="color: #666;">--:--</span></button>
     </div>
 
     <script>
@@ -264,10 +264,10 @@
         function onPlayerStateChange(event) {
             var btn = document.getElementById('playPauseBtn');
             if (event.data == YT.PlayerState.PLAYING) {
-                btn.textContent = "一時停止";
+                btn.textContent = "Pause";
                 startLoopCheck();
             } else {
-                btn.textContent = "再生";
+                btn.textContent = "Play";
                 stopLoopCheck();
             }
         }
@@ -347,11 +347,11 @@
         
             if (val === null) {
                 // 未設定時は下段を少し暗いグレーに
-                btn.innerHTML = type + "点" + "<br><span class='btn-status' style='color: #666;'>--:--</span>";
+                btn.innerHTML = type + "<br><span class='btn-status' style='color: #666;'>--:--</span>";
                 btn.classList.remove('active');
             } else {
                 // 設定時は下段がネオンカラー（#00ffcc）で目立つように
-                btn.innerHTML = type + "点" + "<br><span class='btn-status' style='color: #00ffcc; font-weight: bold; font-size: 14px;'>" + formatTime(val) + "</span>";
+                btn.innerHTML = type + "<br><span class='btn-status' style='color: #00ffcc; font-weight: bold; font-size: 14px;'>" + formatTime(val) + "</span>";
                 btn.classList.add('active');
             }
         }
