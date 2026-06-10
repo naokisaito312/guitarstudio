@@ -98,7 +98,7 @@
         /* 共通ボタン（フットスイッチ・頑丈なメタルボタン風） */
         .btn {
             width: 140px;
-            height: 50px;
+            height: 60px;
             padding: 0;
             /* 1行目の基本スタイル */
             font-size: 14px;
@@ -141,7 +141,6 @@
         
         /* Aボタン、Bボタンの追加スタイル */
         .ab-btn {
-            /* width: 140px; を削除（上の.btnで一括固定されたため、幅の個別指定は不要になりました） */
             position: relative;
         }
         /* A/B点 設定時のLED点灯エフェクト */
@@ -193,12 +192,12 @@
         .speed-buttons {
             display: flex;
             flex-direction: column; /* 縦に2つ並べてスッキリさせる */
-            gap: 4px;
+            gap: 6px;
         }
         .btn.speed-btn {
             width: 90px;
-            height: 23px; /* 高さを半分にしてコンパクトに */
-            font-size: 10px;
+            height: 27px; /* 高さを半分にしてコンパクトに */
+            font-size: 12px;
             border-radius: 3px;
         }
     </style>
