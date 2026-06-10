@@ -255,4 +255,97 @@
 
         // 通常クリック時の挙動
         function handleButtonClick(type) {
-            if (!player || typeof player.getCurrentTime !== 'function
+            if (!player || typeof player.getCurrentTime !== 'function') return;
+            var currentTime = player.getCurrentTime();
+
+            if (type === 'A') {
+                if (pointA === null) {
+                    // A点が未設定の場合は、その地点をA点に設定
+                    pointA = currentTime;
+                    updateButtonUI('A');
+                } else {
+                    // A点が設定済みの場合は、A点から再生を開始
+                    player.seekTo(pointA, true);
+                }
+            } else if (type === 'B') {
+                if (pointB === null) {
+                    // B点が未設定の場合は、その地点をB点に設定
+                    if (pointA !== null && currentTime <= pointA) {
+                        alert('B点はA点より後ろの時間に設定してください。');
+                        return;
+                    }
+                    pointB = currentTime;
+                    updateButtonUI('B');
+                } else {
+                    // B点が設定済みの場合は、B点から再生を開始（通常はA-Bループ中ですが単体ジャンプも可能に）
+                    player.seekTo(pointB, true);
+                }
+            }
+        }
+
+        // 長押し時のクリア処理
+        function clearPoint(type) {
+            if (type === 'A') {
+                pointA = null;
+                updateButtonUI('A');
+            } else if (type === 'B') {
+                pointB = null;
+                updateButtonUI('B');
+            }
+        }
+
+        // A/Bボタンのテキストと見た目を更新
+        function updateButtonUI(type) {
+            var btn = document.getElementById('btn' + type);
+            var val = (type === 'A') ? pointA : pointB;
+
+            if (val === null) {
+                btn.textContent = type + "点 (未設定)";
+                btn.classList.remove('active');
+            } else {
+                btn.textContent = type + "点 (" + formatTime(val) + ")";
+                btn.classList.add('active');
+            }
+        }
+
+        // 秒数を「分:秒」に変換
+        function formatTime(seconds) {
+            var m = Math.floor(seconds / 60);
+            var s = Math.floor(seconds % 60);
+            return m + ":" + (s < 10 ? "0" : "") + s;
+        }
+
+        // --- ループ監視 ---
+        function startLoopCheck() {
+            if (loopTimer) clearInterval(loopTimer);
+            
+            loopTimer = setInterval(function() {
+                // A点とB点が両方設定されている場合のみループを発動
+                if (pointA !== null && pointB !== null) {
+                    var currentTime = player.getCurrentTime();
+                    
+                    // A点より前にいる場合、またはB点を超えた場合にA点に戻す
+                    if (currentTime >= pointB || currentTime < pointA - 0.5) {
+                        player.seekTo(pointA, true);
+                    }
+                }
+            }, 100);
+        }
+
+        function stopLoopCheck() {
+            if (loopTimer) {
+                clearInterval(loopTimer);
+                loopTimer = null;
+            }
+        }
+
+        function resetLoopSettings() {
+            pointA = null;
+            pointB = null;
+            updateButtonUI('A');
+            updateButtonUI('B');
+            stopLoopCheck();
+        }
+    </script>
+</body>
+</html>
