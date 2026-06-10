@@ -38,9 +38,7 @@
             cursor: pointer;
             font-weight: bold;
         }
-        .input-container button:hover {
-            background-color: #cc0000;
-        }
+        .input-container button:hover { background-color: #cc0000; }
 
         .video-container {
             width: 70vw;
@@ -61,51 +59,14 @@
             height: 100%;
         }
 
-        /* ループ設定コントロールのスタイル */
-        .loop-container {
-            margin-top: 15px;
-            width: 70vw;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            background-color: #fff;
-            padding: 15px 20px;
-            border-radius: 8px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
-            box-sizing: border-box;
-        }
-        .loop-box {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-        .loop-btn {
-            padding: 8px 16px;
-            font-size: 14px;
-            font-weight: bold;
-            background-color: #6c757d;
-            color: white;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-        }
-        .loop-btn:hover { background-color: #5a6268; }
-        
-        /* ループ有効化スイッチ */
-        .switch-box {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            font-weight: bold;
-            color: #333;
-        }
-
+        /* コントロールボタンを1列に並べるスタイル */
         .controls {
-            margin-top: 20px;
+            margin-top: 25px;
             display: flex;
-            gap: 15px;
+            gap: 12px;
             justify-content: center;
             align-items: center;
+            flex-wrap: wrap;
         }
 
         .btn {
@@ -119,10 +80,14 @@
             cursor: pointer;
             box-shadow: 0 2px 5px rgba(0,0,0,0.1);
             transition: all 0.2s ease;
+            user-select: none; /* 長押し時にテキスト選択されないようにする */
         }
         .btn:hover {
             background-color: #eef2f7;
             transform: translateY(-1px);
+        }
+        .btn:active {
+            transform: translateY(1px);
         }
         #playPauseBtn {
             background-color: #007bff;
@@ -131,12 +96,17 @@
         }
         #playPauseBtn:hover { background-color: #0056b3; }
         
-        /* 時間表示用 */
-        .time-display {
-            font-size: 14px;
-            color: #555;
-            min-width: 80px;
-            text-align: center;
+        /* Aボタン、Bボタンのスタイル（設定時は色が変わるようにします） */
+        .ab-btn {
+            min-width: 110px;
+        }
+        .ab-btn.active {
+            background-color: #28a745;
+            color: white;
+            border: none;
+        }
+        .ab-btn.active:hover {
+            background-color: #218838;
         }
     </style>
 </head>
@@ -151,27 +121,24 @@
         <div id="player"></div>
     </div>
 
-    <div class="loop-container">
-        <div class="loop-box">
-            <button class="loop-btn" onclick="setPoint('A')">A点を設定 (開始)</button>
-            <span class="time-display" id="displayA">未設定</span>
-        </div>
-        
-        <div class="switch-box">
-            <input type="checkbox" id="loopEnabled" onchange="toggleLoopCheckbox()">
-            <label for="loopEnabled">ABループを有効化</label>
-        </div>
-
-        <div class="loop-box">
-            <button class="loop-btn" onclick="setPoint('B')">B点を設定 (終了)</button>
-            <span class="time-display" id="displayB">未設定</span>
-        </div>
-    </div>
-
     <div class="controls">
         <button class="btn" onclick="skip(-10)">◀ 10秒戻す</button>
         <button class="btn" id="playPauseBtn" onclick="togglePlay()">再生 / 一時停止</button>
         <button class="btn" onclick="skip(10)">10秒進める ▶</button>
+        
+        <button class="btn ab-btn" id="btnA" 
+                onmousedown="startPress('A')" 
+                onmouseup="endPress('A')" 
+                onmouseleave="cancelPress('A')"
+                ontouchstart="startPress('A')" 
+                ontouchend="endPress('A')">A点 (未設定)</button>
+                
+        <button class="btn ab-btn" id="btnB" 
+                onmousedown="startPress('B')" 
+                onmouseup="endPress('B')" 
+                onmouseleave="cancelPress('B')"
+                ontouchstart="startPress('B')" 
+                ontouchend="endPress('B')">B点 (未設定)</button>
     </div>
 
     <script>
@@ -187,6 +154,11 @@
         var pointA = null;
         var pointB = null;
         var loopTimer = null;
+
+        // 長押し判定用の変数
+        var pressTimer = null;
+        var isLongPress = false;
+        var longPressDuration = 500; // 長押しと判定する時間（ミリ秒、0.5秒）
 
         function onYouTubeIframeAPIReady() {
             player = new YT.Player('player', {
@@ -231,9 +203,9 @@
             
             if (videoId && player && typeof player.loadVideoById === 'function') {
                 player.loadVideoById(videoId);
-                resetLoopSettings(); // 動画が変わったらループ設定をリセット
+                resetLoopSettings();
             } else {
-                alert('有効なYouTubeのURLまたは動画IDが見てつかりませんでした。');
+                alert('有効なYouTubeのURLまたは動画IDが見つかりませんでした。');
             }
         }
 
@@ -247,96 +219,40 @@
             var btn = document.getElementById('playPauseBtn');
             if (event.data == YT.PlayerState.PLAYING) {
                 btn.textContent = "一時停止";
-                startLoopCheck(); // 再生が始まったら時間監視を開始
+                startLoopCheck();
             } else {
                 btn.textContent = "再生";
-                stopLoopCheck();  // 停止したら監視も止める
+                stopLoopCheck();
             }
         }
 
-        // --- ここからABループ用のロジック ---
+        // --- A/Bボタンの長押し・クリック制御 ---
 
-        // 現在の再生時間をA点またはB点に設定
-        function setPoint(type) {
-            if (!player || typeof player.getCurrentTime !== 'function') return;
-            var currentTime = player.getCurrentTime();
+        // ボタンが押された時
+        function startPress(type) {
+            isLongPress = false;
+            // 0.5秒後に長押し処理を実行するタイマーをセット
+            pressTimer = setTimeout(function() {
+                isLongPress = true;
+                clearPoint(type);
+            }, longPressDuration);
+        }
+
+        // ボタンが離された時
+        function endPress(type) {
+            clearTimeout(pressTimer); // タイマーを解除
             
-            if (type === 'A') {
-                pointA = currentTime;
-                document.getElementById('displayA').textContent = formatTime(pointA);
-            } else if (type === 'B') {
-                pointB = currentTime;
-                document.getElementById('displayB').textContent = formatTime(pointB);
-            }
-
-            // AとBが両方設定され、かつA < B の場合は自動でループにチェックを入れる
-            if (pointA !== null && pointB !== null && pointA < pointB) {
-                document.getElementById('loopEnabled').checked = true;
+            // 長押し判定になっていなければ、通常のクリック処理
+            if (!isLongPress) {
+                handleButtonClick(type);
             }
         }
 
-        // ループの有効・無効チェックボックスが切り替わった時
-        function toggleLoopCheckbox() {
-            var isChecked = document.getElementById('loopEnabled').checked;
-            if (isChecked) {
-                if (pointA === null || pointB === null) {
-                    alert('A点とB点の両方を設定してください。');
-                    document.getElementById('loopEnabled').checked = false;
-                    return;
-                }
-                if (pointA >= pointB) {
-                    alert('B点はA点より後ろの時間に設定してください。');
-                    document.getElementById('loopEnabled').checked = false;
-                    return;
-                }
-                // 有効化した瞬間に、もし現在地がB点より先ならA点にジャンプ
-                if (player && player.getCurrentTime() > pointB) {
-                    player.seekTo(pointA, true);
-                }
-            }
+        // マウスがボタンの外に出てしまったらタイマーをキャンセル
+        function cancelPress(type) {
+            clearTimeout(pressTimer);
         }
 
-        // 秒数を「分:秒.ミリ秒」の形式に変換する関数
-        function formatTime(seconds) {
-            var m = Math.floor(seconds / 60);
-            var s = Math.floor(seconds % 60);
-            return m + ":" + (s < 10 ? "0" : "") + s;
-        }
-
-        // 再生時間の監視を開始 (0.1秒ごとにチェック)
-        function startLoopCheck() {
-            if (loopTimer) clearInterval(loopTimer);
-            
-            loopTimer = setInterval(function() {
-                var isEnabled = document.getElementById('loopEnabled').checked;
-                if (!isEnabled || pointA === null || pointB === null) return;
-
-                var currentTime = player.getCurrentTime();
-                
-                // 現在の再生時間がB点を超えたら、A点へ巻き戻す
-                if (currentTime >= pointB) {
-                    player.seekTo(pointA, true);
-                }
-            }, 100); // 100ミリ秒ごとにチェック（精度を上げたい場合は数字を小さく）
-        }
-
-        // 再生時間の監視を停止
-        function stopLoopCheck() {
-            if (loopTimer) {
-                clearInterval(loopTimer);
-                loopTimer = null;
-            }
-        }
-
-        // 新しい動画が読み込まれた時に設定を初期化する
-        function resetLoopSettings() {
-            pointA = null;
-            pointB = null;
-            document.getElementById('loopEnabled').checked = false;
-            document.getElementById('displayA').textContent = "未設定";
-            document.getElementById('displayB').textContent = "未設定";
-            stopLoopCheck();
-        }
-    </script>
-</body>
-</html>
+        // 通常クリック時の挙動
+        function handleButtonClick(type) {
+            if (!player || typeof player.getCurrentTime !== 'function
