@@ -204,6 +204,54 @@
             font-size: 12px;
             border-radius: 3px;
         }
+
+        /* ★新設：TAPコントロール全体の枠 */
+        .tap-panel {
+            display: flex;
+            align-items: center;
+            background: rgba(0, 0, 0, 0.2);
+            padding: 5px 10px;
+            border-radius: 8px;
+            border: 1px dashed #3a3a45;
+            gap: 10px;
+        }
+
+        /* 液晶ディスプレイ風のBPM表示窓 */
+        .tap-display {
+            width: 70px;
+            height: 48px;
+            background-color: #0d0d0f;
+            border: 2px solid #2d2d34;
+            border-radius: 4px;
+            font-size: 10px;
+            color: #666;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            font-weight: bold;
+            box-shadow: inset 0 2px 5px rgba(0,0,0,0.8);
+        }
+        .tap-display span {
+            font-size: 16px;
+            color: #444; /* 最初（未設定）は暗く沈ませる */
+            margin-top: 2px;
+            transition: color 0.1s;
+        }
+
+        /* TAP専用のコンパクトなボタン */
+        .btn.tap-btn {
+            width: 70px;
+            height: 48px;
+            font-size: 11px;
+            border-radius: 6px;
+            border-color: #555;
+            color: #ccc;
+        }
+        .btn.tap-btn:hover {
+            background: linear-gradient(180deg, #4a4a57 0%, #2f2f38 100%);
+            color: #fff;
+        }
     </style>
 </head>
 <body>
@@ -242,6 +290,11 @@
                 <button class="btn speed-btn" onclick="changeSpeed(1)">SPEED +</button>
                 <button class="btn speed-btn" onclick="changeSpeed(-1)">SPEED -</button>
             </div>
+        </div>
+
+        <div class="tap-panel">
+            <div class="tap-display" id="bpmDisplay">BPM<br><span>---</span></div>
+            <button class="btn tap-btn" id="tapBtn" onmousedown="tapBPM()">TAP (T)</button>
         </div>
     </div>
 
@@ -482,7 +535,48 @@
                 displaySpan.style.color = '#ff9900'; // テンポ変更中オレンジ
             }
         }
-        
+
+        // --- TAP BPM コントロールのロジック ---
+        var tapTimes = [];
+        var tapTimeoutTimer = null;
+
+        function tapBPM() {
+            var now = Date.now();
+
+            // 前回のタップから3秒以上空いたら、新しい曲の計測とみなしてリセット
+            if (tapTimes.length > 0 && (now - tapTimes[tapTimes.length - 1] > 3000)) {
+                tapTimes = [];
+            }
+
+            tapTimes.push(now);
+
+            // 2回以上タップされたらBPMを計算
+            if (tapTimes.length > 1) {
+                // タップ間のすべての間隔（ミリ秒）を計算して平均を出す
+                var intervals = [];
+                for (var i = 1; i < tapTimes.length; i++) {
+                    intervals.push(tapTimes[i] - tapTimes[i - 1]);
+                }
+                
+                var avgInterval = intervals.reduce(function(a, b) { return a + b; }) / intervals.length;
+                
+                // ミリ秒からBPMに変換 (60000ms / 平均間隔)
+                var bpm = Math.round(60000 / avgInterval);
+
+                // 画面表示を更新（ネオンレッド/ピンクでBPMを表示）
+                var bpmSpan = document.querySelector('#bpmDisplay span');
+                bpmSpan.textContent = bpm;
+                bpmSpan.style.color = '#ff3b30';
+                bpmSpan.style.textShadow = '0 0 8px rgba(255,59,48,0.6)';
+            }
+
+            // 視覚的なフィードバック：タップした瞬間にボタンを一瞬フラッシュさせる
+            var tapBtn = document.getElementById('tapBtn');
+            tapBtn.style.background = 'linear-gradient(180deg, #555 0%, #333 100%)';
+            setTimeout(function() {
+                tapBtn.style.background = ''; // 元のCSSに戻す
+            }, 50);
+        }
         // --- キーボード操作の制御 ---
         window.addEventListener('keydown', function(event) {
             // URL入力欄（input）にフォーカスがある場合は、キーボードショートカットを無効化する
@@ -523,7 +617,11 @@
                 case 'ArrowUp': // 上矢印キーで加速
                     changeSpeed(1);
                     break;
-                    
+
+                case 't': // Tキー（小文字・大文字両対応）
+                case 'T':
+                    tapBPM();
+                    break;
                 default:
                     return; // その他のキーは何もしない
             }
