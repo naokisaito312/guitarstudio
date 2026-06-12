@@ -711,8 +711,9 @@
             currentBeat = (currentBeat + 1) % 4; // 4拍子ループ
         }
 
-        // カウントイン中に鳴った拍数を数えるグローバル変数（関数の外、または直前に配置してもOKです）
+        // カウントイン中に鳴った拍数を数える変数と、発振器を記録する配列
         var countInBeats = 0; 
+        var activeOscillators = []; // 先読みされた発振器を溜めておく配列
 
         // 実際に電子音を作る関数
         function scheduleNote(beatNumber, time) {
@@ -737,6 +738,9 @@
             osc.start(time);
             osc.stop(time + 0.06);
 
+            // ★【重要】生成した発振器を配列に記録しておく（後で強制停止できるようにするため）
+            activeOscillators.push(osc);
+
             // 視覚的フィードバック：音に合わせてLEDを一瞬光らせる
             setTimeout(function() {
                 var led = document.getElementById('metroLed');
@@ -759,7 +763,7 @@
                 }
             }, (time - audioCtx.currentTime) * 1000);
 
-            // ★【ここを修正】カウントイン中の場合、拍数を正確に4回数えてから動画を再生する
+            // カウントイン中の場合、拍数を正確に4回数えてから動画を再生する
             if (isCountingIn) {
                 countInBeats++; // 鳴った拍数をインクリメント
                 
@@ -769,36 +773,41 @@
                     
                     // 次の小節の頭（5拍目の直前）で正確に動画をリスタート
                     setTimeout(function() {
-                        if (isCountingIn) { // 念のためまだカウントイン中か確認
+                        if (isCountingIn) {
                             isCountingIn = false; // カウントイン終了
                             countInBeats = 0;     // カウンターをリセット
                             
-                            // ★【ここを完全修正：順番と処理を最適化】
-                            // 1. まずWeb Audio APIの先読みタイマー(setTimeout)を最優先で完全に破壊・停止する
+                            // ★【ここが確実なバグ修正】
+                            // 先読みでブラウザに予約されてしまった未来の「ぴ」の音をすべて物理的に破壊・消去する
+                            activeOscillators.forEach(function(activeOsc) {
+                                try {
+                                    activeOsc.stop(); // 鳴る予定の音を強制停止
+                                } catch(e) {}
+                            });
+                            activeOscillators = []; // 配列を空にする
+
+                            // タイマーをクリアしてメトロノームを完全OFFにする
                             if (metroTimer) {
                                 clearTimeout(metroTimer);
                                 metroTimer = null;
                             }
-                            
-                            // 2. メトロノームを内部的に停止状態にし、LEDを消灯する
                             isMetroPlaying = false;
+
+                            // LEDとボタンの外観を完全消灯にリセット
                             var led = document.getElementById('metroLed');
                             var btn = document.getElementById('metroBtn');
                             if (led) {
                                 led.classList.remove('on');
                                 led.classList.remove('flash');
-                                led.style.background = '#333'; // 消灯色(ダークグレー)に強制リセット
+                                led.style.background = '#333';
                                 led.style.boxShadow = 'none';
                             }
-                            if (btn) {
-                                btn.style.borderColor = '';
-                            }
+                            if (btn) btn.style.borderColor = '';
                             
-                            // 3. 次回のカウントインが綺麗な「2拍目の ぽ (beatNumber = 1)」から予約されるように仕込む
-                            //（これで再起動時に1拍目の「ぴ」が重複して暴発するのを完璧に防ぎます）
-                            currentBeat = 1; 
+                            // 次回復帰時は綺麗な1拍目（beatNumber=0）から予約させる
+                            currentBeat = 0; 
                             
-                            // 4. 満を持して動画の再生を開始
+                            // 動画の再生を開始
                             if (player && typeof player.playVideo === 'function') {
                                 player.playVideo();
                             }
