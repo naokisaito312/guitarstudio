@@ -520,12 +520,17 @@
             return m + ":" + (s < 10 ? "0" : "") + s;
         }
 
-        // --- カウントイン機能付きループ監視 ---
+        // --- カウントイン機能付きループ監視（多重起動完全防止版） ---
         var isCountingIn = false; // カウントイン中かどうかを管理するフラグ
 
         function startLoopCheck() {
-            if (loopTimer) clearInterval(loopTimer);
+            // ★【重要】すでにタイマーが動いている場合は、一度完全にクリアして二重起動を防ぐ
+            if (loopTimer) {
+                clearInterval(loopTimer);
+                loopTimer = null;
+            }
             
+            // 新しくタイマーを1つだけ起動
             loopTimer = setInterval(function() {
                 if (!player || typeof player.getCurrentTime !== 'function') return;
 
