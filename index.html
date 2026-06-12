@@ -565,10 +565,10 @@
             }, 100);
         }
 
-        // --- 音を滑らかにフェードアウトさせる関数（3秒仕様に修正） ---
+        // --- 音を滑らかにフェードアウトさせる関数（1秒仕様に修正） ---
         function startFadeOut(callback) {
             var currentVolume = 100; // 現在の音量（最大）
-            var duration = 3000;    // ★3秒（3000ms）かけてフェードアウトするよう修正
+            var duration = 1000;    // ★1秒（1000ms）かけてフェードアウト
             var intervalTime = 50;  // 50ミリ秒ごとに音量を更新
             var step = currentVolume / (duration / intervalTime); // 1回あたりの音量減少量
 
@@ -590,11 +590,11 @@
             }, intervalTime);
         }
 
-        // --- 音を滑らかにフェードインさせる関数（3秒仕様） ---
+        // --- 音を滑らかにフェードインさせる関数（2秒仕様に修正） ---
         function startFadeIn(callback) {
             var targetVolume = 100; // 最終的な音量（最大）
             var currentVolume = 0;
-            var duration = 3000;   // 3秒（3000ms）かけてフェードイン
+            var duration = 2000;   // ★2秒（2000ms）かけてフェードイン
             var intervalTime = 50; // 50ミリ秒ごとに音量を更新
             var step = targetVolume / (duration / intervalTime); // 1回あたりの音量増加量
 
