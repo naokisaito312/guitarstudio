@@ -409,14 +409,20 @@
             return (match && match[2].length == 11) ? match[2] : url;
         }
 
+        // プレーヤーの状態が変更されたときに呼び出される関数
         function onPlayerStateChange(event) {
-            var btn = document.getElementById('playPauseBtn');
+            // ★【超重要ガード】カウントイン中は、YouTubeの状態変化によるタイマー再起動を完全にスルーする
+            if (isCountingIn) return;
+
             if (event.data == YT.PlayerState.PLAYING) {
-                btn.textContent = "Pause";
+                // 再生が開始されたらループチェックをスタート（A点、B点が設定されていれば動く）
                 startLoopCheck();
-            } else {
-                btn.textContent = "Play";
-                stopLoopCheck();
+            } else if (event.data == YT.PlayerState.PAUSED || event.data == YT.PlayerState.ENDED) {
+                // 一時停止または終了したら、一旦ループチェックを停止する
+                // ただし、A-B点が設定されている場合は停止させないように安全処理
+                if (pointA === null || pointB === null) {
+                    stopLoopCheck();
+                }
             }
         }
 
@@ -520,26 +526,29 @@
             return m + ":" + (s < 10 ? "0" : "") + s;
         }
 
-        // --- カウントイン機能付きループ監視（多重起動完全防止版） ---
+        // --- カウントイン機能付きループ監視（多重起動・連打完全防止版） ---
         var isCountingIn = false; // カウントイン中かどうかを管理するフラグ
 
         function startLoopCheck() {
-            // ★【重要】すでにタイマーが動いている場合は、一度完全にクリアして二重起動を防ぐ
+            // すでに古いタイマーがある場合は、安全のために一度完全に破棄する
             if (loopTimer) {
                 clearInterval(loopTimer);
                 loopTimer = null;
             }
             
-            // 新しくタイマーを1つだけ起動
+            // タイマーを1つだけ新規起動
             loopTimer = setInterval(function() {
                 if (!player || typeof player.getCurrentTime !== 'function') return;
 
-                // A点とB点が両方設定されており、かつ今カウントイン中でない場合のみチェック
-                if (pointA !== null && pointB !== null && !isCountingIn) {
+                // ★【超重要ガード】すでにカウントイン中なら、タイマーの連打処理をすべて完全に無視する
+                if (isCountingIn) return;
+
+                // A点とB点が両方設定されている場合のみチェック
+                if (pointA !== null && pointB !== null) {
                     var currentTime = player.getCurrentTime();
                     
                     if (currentTime >= 0 && currentTime >= pointB) {
-                        // 1. カウントインフラグを立て、拍数カウンターをリセット
+                        // 1. 2回目が絶対に呼ばれないよう、最優先でカウントインフラグを立てる
                         isCountingIn = true;
                         countInBeats = 0; 
                         
@@ -552,7 +561,7 @@
                             toggleMetronome();
                         }
 
-                        // 4. 次の拍のタイミングが「1拍目（beatNumber = 0）」から始まるようにリセット
+                        // 4. 次の拍のタイミングが必ず「1拍目（beatNumber = 0）」から始まるようにリセット
                         currentBeat = 0;
                     }
                 }
