@@ -511,52 +511,34 @@
             return m + ":" + (s < 10 ? "0" : "") + s;
         }
 
-        // --- ループ監視 --- カウントイン機能付き ---
+        // --- カウントイン機能付きループ監視 ---
         var isCountingIn = false; // カウントイン中かどうかを管理するフラグ
 
         function startLoopCheck() {
             if (loopTimer) clearInterval(loopTimer);
             
             loopTimer = setInterval(function() {
-                // playerが準備できていない、またはgetCurrentTimeが関数でない場合はスキップ
                 if (!player || typeof player.getCurrentTime !== 'function') return;
 
                 // A点とB点が両方設定されており、かつ今カウントイン中でない場合のみチェック
                 if (pointA !== null && pointB !== null && !isCountingIn) {
                     var currentTime = player.getCurrentTime();
                     
-                    // 現在の時間が正常に取得できていて、B点を超えた場合
                     if (currentTime >= 0 && currentTime >= pointB) {
-                        
-                        // 1. カウントイン処理を開始（二重発動を防ぐ）
+                        // 1. カウントインフラグを立てる
                         isCountingIn = true;
                         
-                        // 2. 動画を一旦ストップ（A点にシークして一時停止状態にする）
+                        // 2. 動画をA点に戻して、確実に一時停止
                         player.seekTo(pointA, true);
                         player.pauseVideo();
 
-                        // 3. メトロノームを強制的にONにして同期（すでにONならそのまま）
+                        // 3. メトロノームが鳴っていなければ自動起動
                         if (!isMetroPlaying) {
                             toggleMetronome();
                         }
 
-                        // 4. カウントイン用のリセット
-                        currentBeat = 0; 
-                        
-                        // 5. メトロノームが「4拍」鳴るのを監視する処理
-                        // scheduleNoteの中で1拍ごとにbeatNumberが回るので、次に0に戻るタイミング（＝4拍叩き終わった瞬間）を待ちます
-                        var checkBeatTimer = setInterval(function() {
-                            // currentBeatが1周して再び0に戻ろうとした瞬間、つまり4拍（1小節）が完了したとき
-                            if (currentBeat === 0) {
-                                clearInterval(checkBeatTimer); // 拍数監視を終了
-                                
-                                // カウントイン終了、動画の再生を再開
-                                isCountingIn = false;
-                                if (player && typeof player.playVideo === 'function') {
-                                    player.playVideo();
-                                }
-                            }
-                        }, 50); // 50ミリ秒ごとに高精度で拍の切り替わりをチェック
+                        // 4. 次の拍のタイミングが「1拍目（beatNumber = 0）」から始まるようにリセット
+                        currentBeat = 0;
                     }
                 }
             }, 100);
