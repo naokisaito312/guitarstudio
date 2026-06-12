@@ -582,12 +582,14 @@
             transition: opacity 0.05s linear; 
         }
 
-        // --- 音を滑らかにフェードアウトさせる関数 ---
+        // --- 音と画面を同時にフェードアウトさせる関数（1秒仕様） ---
         function startFadeOut(callback) {
             var currentVolume = 100; // 現在の音量（最大）
-            var duration = 1000;    // 3秒かけてフェードアウト
-            var intervalTime = 50;  // 50ミリ秒ごとに音量を更新
-            var step = currentVolume / (duration / intervalTime); // 1回あたりの音量減少量
+            var duration = 1000;    // 1秒（1000ms）かけてフェードアウト
+            var intervalTime = 50;  // 50ミリ秒ごとに更新
+            var step = currentVolume / (duration / intervalTime); // 1回あたりの減少量
+
+            var pElement = document.getElementById('player'); // 動画要素を取得
 
             var fadeOutTimer = setInterval(function() {
                 if (!player || typeof player.setVolume !== 'function') {
@@ -599,21 +601,25 @@
                 currentVolume -= step;
                 if (currentVolume <= 0) {
                     player.setVolume(0);
+                    if (pElement) pElement.style.opacity = 0; // 完全に真っ暗にする
                     clearInterval(fadeOutTimer);
-                    if (callback) callback(); // フェードアウト完了後に巻き戻しを実行
+                    if (callback) callback(); // 完了後に巻き戻しを実行
                 } else {
                     player.setVolume(Math.round(currentVolume));
+                    if (pElement) pElement.style.opacity = (currentVolume / 100); // 画面もじわじわ暗く
                 }
             }, intervalTime);
         }
 
-        // --- 音を滑らかにフェードインさせる関数 ---
+        // --- 音と画面を同時にフェードインさせる関数（2秒仕様） ---
         function startFadeIn(callback) {
             var targetVolume = 100; // 最終的な音量（最大）
             var currentVolume = 0;
-            var duration = 2000;   // 3秒かけてフェードイン
-            var intervalTime = 50; // 50ミリ秒ごとに音量を更新
-            var step = targetVolume / (duration / intervalTime); // 1回あたりの音量増加量
+            var duration = 2000;   // 2秒（2000ms）かけてフェードイン
+            var intervalTime = 50; // 50ミリ秒ごとに更新
+            var step = targetVolume / (duration / intervalTime); // 1回あたりの増加量
+
+            var pElement = document.getElementById('player'); // 動画要素を取得
 
             var fadeInTimer = setInterval(function() {
                 if (!player || typeof player.setVolume !== 'function') {
@@ -625,10 +631,12 @@
                 currentVolume += step;
                 if (currentVolume >= targetVolume) {
                     player.setVolume(targetVolume);
+                    if (pElement) pElement.style.opacity = 1; // 完全に100%表示にする
                     clearInterval(fadeInTimer);
                     if (callback) callback(); // 全工程終了
                 } else {
                     player.setVolume(Math.round(currentVolume));
+                    if (pElement) pElement.style.opacity = (currentVolume / 100); // 画面もじわじわ明るく
                 }
             }, intervalTime);
         }
