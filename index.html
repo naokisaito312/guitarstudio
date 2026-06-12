@@ -526,65 +526,91 @@
             return m + ":" + (s < 10 ? "0" : "") + s;
         }
 
-        // --- 修正版：3秒前プレロール＆フェードイン付きループ監視 ---
-        var isPreRolling = false; // プレロール（巻き戻り処理）中かどうかのフラグ
+        // --- 修正版：3秒フェードアウト ➔ 3秒前ジャンプ ➔ 3秒フェードイン付きループ監視 ---
+        var isLoopSequence = false; // フェードアウト〜巻き戻しの一連の処理中かどうかのフラグ
 
         function startLoopCheck() {
             if (loopTimer) {
                 clearInterval(loopTimer);
-                loopTimer = null;
+                null;
             }
             
             loopTimer = setInterval(function() {
                 if (!player || typeof player.getCurrentTime !== 'function') return;
 
-                // 巻き戻し処理中でない場合のみB点の到達チェックを行う
-                if (pointA !== null && pointB !== null && !isPreRolling) {
+                // 一連のループ処理中でない場合のみB点の到達チェックを行う
+                if (pointA !== null && pointB !== null && !isLoopSequence) {
                     var currentTime = player.getCurrentTime();
                     
                     if (currentTime >= 0 && currentTime >= pointB) {
-                        isPreRolling = true; // 多重発動防止フラグをオン
+                        isLoopSequence = true; // 多重発動防止フラグをオン
                         
-                        // ① A点の「3秒前」の時間を計算
-                        var preRollTime = pointA - 3;
-                        if (preRollTime < 0) {
-                            preRollTime = 0; // 0秒未満になる場合は0秒に固定
-                        }
-                        
-                        // ② 計算した位置へジャンプ
-                        player.seekTo(preRollTime, true);
-                        
-                        // ③ 音量を0にしてフェードイン関数を呼び出す
-                        player.setVolume(0);
-                        startFadeIn();
-                        
-                        // ④ 少し時間を置いてからフラグを解除（シーク時のラグによる誤作動防止）
-                        setTimeout(function() {
-                            isPreRolling = false;
-                        }, 500);
+                        // ① まずはその場で音量を3秒かけて下げる（フェードアウト開始）
+                        startFadeOut(function() {
+                            // ② フェードアウトが完全に終わったら（3秒後）、A点の「3秒前」を計算してジャンプ
+                            var preRollTime = pointA - 3;
+                            if (preRollTime < 0) {
+                                preRollTime = 0;
+                            }
+                            player.seekTo(preRollTime, true);
+                            
+                            // ③ 音量を0にした状態から、3秒かけてフェードイン
+                            player.setVolume(0);
+                            startFadeIn(function() {
+                                // ④ すべてのフェード処理が終わったら、次のループのためにフラグを解除
+                                isLoopSequence = false;
+                            });
+                        });
                     }
                 }
             }, 100);
         }
 
+        // --- 音を滑らかにフェードアウトさせる関数 ---
+        function startFadeOut(callback) {
+            var currentVolume = 100; // 現在の音量（最大）
+            var duration = 3000;    // 3秒かけてフェードアウト
+            var intervalTime = 50;  // 50ミリ秒ごとに音量を更新
+            var step = currentVolume / (duration / intervalTime); // 1回あたりの音量減少量
+
+            var fadeOutTimer = setInterval(function() {
+                if (!player || typeof player.setVolume !== 'function') {
+                    clearInterval(fadeOutTimer);
+                    if (callback) callback();
+                    return;
+                }
+
+                currentVolume -= step;
+                if (currentVolume <= 0) {
+                    player.setVolume(0);
+                    clearInterval(fadeOutTimer);
+                    if (callback) callback(); // フェードアウト完了後に巻き戻しを実行
+                } else {
+                    player.setVolume(Math.round(currentVolume));
+                }
+            }, intervalTime);
+        }
+
         // --- 音を滑らかにフェードインさせる関数 ---
-        function startFadeIn() {
+        function startFadeIn(callback) {
             var targetVolume = 100; // 最終的な音量（最大）
             var currentVolume = 0;
             var duration = 3000;   // 3秒かけてフェードイン
             var intervalTime = 50; // 50ミリ秒ごとに音量を更新
             var step = targetVolume / (duration / intervalTime); // 1回あたりの音量増加量
 
-            var fadeTimer = setInterval(function() {
+            var fadeInTimer = setInterval(function() {
                 if (!player || typeof player.setVolume !== 'function') {
-                    clearInterval(fadeTimer);
+                    clearInterval(fadeInTimer);
+                    if (callback) callback();
                     return;
                 }
 
                 currentVolume += step;
                 if (currentVolume >= targetVolume) {
                     player.setVolume(targetVolume);
-                    clearInterval(fadeTimer); // 目標音量に達したらタイマー停止
+                    clearInterval(fadeInTimer);
+                    if (callback) callback(); // 全工程終了
                 } else {
                     player.setVolume(Math.round(currentVolume));
                 }
