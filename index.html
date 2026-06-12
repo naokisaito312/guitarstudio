@@ -758,6 +758,11 @@
                         if (isCountingIn) { // 念のためまだカウントイン中か確認
                             isCountingIn = false; // カウントイン終了
                             countInBeats = 0;     // カウンターをリセット
+                            
+                            // ★【ここを追加】動画再開の瞬間に、メトロノームのタイマーも今この瞬間に完全にリセットする
+                            nextNoteTime = audioCtx.currentTime;
+                            currentBeat = 0; // 確実に1拍目(ピ音)からスタートさせる
+                            
                             if (player && typeof player.playVideo === 'function') {
                                 player.playVideo(); // 動画再生開始！
                             }
