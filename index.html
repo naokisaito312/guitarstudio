@@ -768,10 +768,17 @@
                             isCountingIn = false; // カウントイン終了
                             countInBeats = 0;     // カウンターをリセット
                             
-                            // ★【ここを修正】動画が始まる瞬間に、メトロノームを強制停止（OFF）にする
+                            // メトロノームを強制停止（OFF）にする
                             if (isMetroPlaying) {
-                                toggleMetronome(); // メトロノームをOFFにする（LEDも自動で消灯します）
+                                toggleMetronome(); // ここでisMetroPlayingがfalseになり、タイマーも止まります
                             }
+                            
+                            // ★【ここを追加】裏で先読み予約されてしまった音を完全に消し去る
+                            if (metroTimer) {
+                                clearTimeout(metroTimer);
+                            }
+                            // 拍のカウントも初期化
+                            currentBeat = 0;
                             
                             if (player && typeof player.playVideo === 'function') {
                                 player.playVideo(); // 動画再生開始！
