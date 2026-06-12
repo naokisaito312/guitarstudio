@@ -797,7 +797,7 @@
                 countInBeats++; // 鳴った拍数をインクリメント
                 
                 // 4拍（1、2、3、4）鳴り終わった瞬間のタイミングを計算
-                if (countInBeats === 8) {
+                if (countInBeats === 9) {
                     var playDelay = (time - audioCtx.currentTime) * 1000;
                     
                     // 次の小節の頭（5拍目の直前）で正確に動画をリスタート
