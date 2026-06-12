@@ -546,6 +546,9 @@
                     if (currentTime >= 0 && currentTime >= pointB) {
                         isLoopSequence = true; 
                         
+                        // B点に達したまさにその瞬間に「ピコッ」と鳴らす
+                        playPikoSound();
+                        
                         // そのまま3秒間のフェードアウトへ移行
                         startFadeOut(function() {
                             var preRollTime = pointA - 3;
@@ -564,17 +567,97 @@
             }, 100);
         }
 
-        #player {
-            width: 70vw;
-            height: 40vw;
-            max-width: 800px;
-            max-height: 450px;
-            background: #000;
-            border-radius: 6px;
-            border: 4px solid #2d2d34;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.7);
-            /* ★動画のフェードを滑らかにする設定を追記 */
-            transition: opacity 0.05s linear; 
+        // --- 音を滑らかにフェードアウトさせる関数（1秒仕様に修正） ---
+        function startFadeOut(callback) {
+            var currentVolume = 100; // 現在の音量（最大）
+            var duration = 1000;    // ★1秒（1000ms）かけてフェードアウト
+            var intervalTime = 50;  // 50ミリ秒ごとに音量を更新
+            var step = currentVolume / (duration / intervalTime); // 1回あたりの音量減少量
+
+            var fadeOutTimer = setInterval(function() {
+                if (!player || typeof player.setVolume !== 'function') {
+                    clearInterval(fadeOutTimer);
+                    if (callback) callback();
+                    return;
+                }
+
+                currentVolume -= step;
+                if (currentVolume <= 0) {
+                    player.setVolume(0);
+                    clearInterval(fadeOutTimer);
+                    if (callback) callback(); // フェードアウト完了後に巻き戻しを実行
+                } else {
+                    player.setVolume(Math.round(currentVolume));
+                }
+            }, intervalTime);
+        }
+
+        // --- 音を滑らかにフェードインさせる関数（2秒仕様に修正） ---
+        function startFadeIn(callback) {
+            var targetVolume = 100; // 最終的な音量（最大）
+            var currentVolume = 0;
+            var duration = 2000;   // ★2秒（2000ms）かけてフェードイン
+            var intervalTime = 50; // 50ミリ秒ごとに音量を更新
+            var step = targetVolume / (duration / intervalTime); // 1回あたりの音量増加量
+
+            var fadeInTimer = setInterval(function() {
+                if (!player || typeof player.setVolume !== 'function') {
+                    clearInterval(fadeInTimer);
+                    if (callback) callback();
+                    return;
+                }
+
+                currentVolume += step;
+                if (currentVolume >= targetVolume) {
+                    player.setVolume(targetVolume);
+                    clearInterval(fadeInTimer);
+                    if (callback) callback(); // 全工程終了
+                } else {
+                    player.setVolume(Math.round(currentVolume));
+                }
+            }, intervalTime);
+        }
+
+        // --- ループ折り返し時の「ピコッ」という電子音（ブラウザ制限完全解除版） ---
+        function playPikoSound() {
+            try {
+                // 1. audioCtx が存在しない場合は、最優先で新しく作成する
+                if (!audioCtx) {
+                    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                }
+                
+                // 2. ★【最重要】ブラウザのセキュリティ制限（サスペンド状態）を強制的に解除（アクティブ化）する
+                if (audioCtx.state === 'suspended') {
+                    audioCtx.resume();
+                }
+
+                // 3. 音を生成する準備
+                var now = audioCtx.currentTime;
+                var osc = audioCtx.createOscillator();
+                var gainNode = audioCtx.createGain();
+
+                osc.connect(gainNode);
+                gainNode.connect(audioCtx.destination);
+
+                // サウンドタイプをクリアなサイン波に設定
+                osc.type = 'sine';
+
+                // 「ピ（1200Hz）」から「コ（1600Hz）」へ超高速で跳ね上げる設定
+                osc.frequency.setValueAtTime(1200, now);
+                osc.frequency.setValueAtTime(1600, now + 0.04);
+
+                // 音量とキレの調整（0.1秒で綺麗に消えるように）
+                // ※音が聞こえやすいように、少しだけ音量を大きめ（0.3）に調整しました
+                gainNode.gain.setValueAtTime(0.3, now); 
+                gainNode.gain.exponentialRampToValueAtTime(0.001, now + 0.08);
+
+                // 発音開始と停止
+                osc.start(now);
+                osc.stop(now + 0.1);
+                
+            } catch (e) {
+                console.log("Audio Error:", e); // 万が一エラーが出た場合はコンソールに記録
+            }
         }
 
         // --- 音を滑らかにフェードアウトさせる関数 ---
