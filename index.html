@@ -758,6 +758,21 @@
                     }, 40);
                 }
             }, (time - audioCtx.currentTime) * 1000);
+
+            // カウントイン中の場合、拍数をカウントして1小節分（4拍）終わったら動画を再生する
+            if (isCountingIn) {
+                // 音が鳴るタイミング（time）に合わせて、正確に動画再生とフラグ解除を予約
+                var playDelay = (time - audioCtx.currentTime) * 1000;
+                setTimeout(function() {
+                    // 4拍叩き終わった次の1拍目の音が鳴る直前のタイミング（beatNumberが0に戻った時）
+                    if (beatNumber === 0) {
+                        isCountingIn = false; // カウントイン終了
+                        if (player && typeof player.playVideo === 'function') {
+                            player.playVideo(); // 動画再生開始！
+                        }
+                    }
+                }, playDelay);
+            }
         }
 
         // TAP BPMが更新された時に、動的にメトロノームの速度も追従させるための処理
