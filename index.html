@@ -569,7 +569,7 @@
         // --- 音を滑らかにフェードアウトさせる関数 ---
         function startFadeOut(callback) {
             var currentVolume = 100; // 現在の音量（最大）
-            var duration = 2000;    // 3秒かけてフェードアウト
+            var duration = 1000;    // 3秒かけてフェードアウト
             var intervalTime = 50;  // 50ミリ秒ごとに音量を更新
             var step = currentVolume / (duration / intervalTime); // 1回あたりの音量減少量
 
