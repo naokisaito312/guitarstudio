@@ -526,8 +526,8 @@
             return m + ":" + (s < 10 ? "0" : "") + s;
         }
 
-        // --- カウントイン機能付きループ監視（時間同期・確定対策版） ---
-        var isCountingIn = false; // カウントイン中かどうかを管理するフラグ
+        // --- 修正版：3秒前プレロール＆フェードイン付きループ監視 ---
+        var isPreRolling = false; // プレロール（巻き戻り処理）中かどうかのフラグ
 
         function startLoopCheck() {
             if (loopTimer) {
@@ -538,49 +538,59 @@
             loopTimer = setInterval(function() {
                 if (!player || typeof player.getCurrentTime !== 'function') return;
 
-                if (isCountingIn) return;
-
-                if (pointA !== null && pointB !== null) {
+                // 巻き戻し処理中でない場合のみB点の到達チェックを行う
+                if (pointA !== null && pointB !== null && !isPreRolling) {
                     var currentTime = player.getCurrentTime();
                     
                     if (currentTime >= 0 && currentTime >= pointB) {
-                        isCountingIn = true;
-                        countInBeats = 0; 
+                        isPreRolling = true; // 多重発動防止フラグをオン
                         
-                        player.seekTo(pointA, true);
-                        player.pauseVideo();
-
-                        // ★【ここを完全修正：メトロノームの時間を厳密に初期化】
-                        if (!audioCtx) {
-                            audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                        // ① A点の「3秒前」の時間を計算
+                        var preRollTime = pointA - 3;
+                        if (preRollTime < 0) {
+                            preRollTime = 0; // 0秒未満になる場合は0秒に固定
                         }
-                        if (audioCtx.state === 'suspended') {
-                            audioCtx.resume();
-                        }
-
-                        // 1. メトロノームを「再生中」にする
-                        isMetroPlaying = true;
-
-                        // 2. ご指摘のバグを回避：次の音の時間を「今この瞬間」に完璧に同期する
-                        // これにより、scheduler内のwhileが過去の遅れをリセットし、多重発報を100%防ぎます
-                        nextNoteTime = audioCtx.currentTime + 0.02; 
                         
-                        // 3. 確実に1拍目（beatNumber = 0 / ぴ音）からスタート
-                        currentBeat = 0;
-
-                        // 4. GUI（LEDとボタン）を点灯状態にする
-                        var led = document.getElementById('metroLed');
-                        var btn = document.getElementById('metroBtn');
-                        if (led) led.classList.add('on');
-                        if (btn) btn.style.borderColor = '#ff3b30';
-
-                        // 5. 高精度スケジューラーを起動
-                        scheduler();
+                        // ② 計算した位置へジャンプ
+                        player.seekTo(preRollTime, true);
+                        
+                        // ③ 音量を0にしてフェードイン関数を呼び出す
+                        player.setVolume(0);
+                        startFadeIn();
+                        
+                        // ④ 少し時間を置いてからフラグを解除（シーク時のラグによる誤作動防止）
+                        setTimeout(function() {
+                            isPreRolling = false;
+                        }, 500);
                     }
                 }
             }, 100);
         }
 
+        // --- 音を滑らかにフェードインさせる関数 ---
+        function startFadeIn() {
+            var targetVolume = 100; // 最終的な音量（最大）
+            var currentVolume = 0;
+            var duration = 3000;   // 3秒かけてフェードイン
+            var intervalTime = 50; // 50ミリ秒ごとに音量を更新
+            var step = targetVolume / (duration / intervalTime); // 1回あたりの音量増加量
+
+            var fadeTimer = setInterval(function() {
+                if (!player || typeof player.setVolume !== 'function') {
+                    clearInterval(fadeTimer);
+                    return;
+                }
+
+                currentVolume += step;
+                if (currentVolume >= targetVolume) {
+                    player.setVolume(targetVolume);
+                    clearInterval(fadeTimer); // 目標音量に達したらタイマー停止
+                } else {
+                    player.setVolume(Math.round(currentVolume));
+                }
+            }, intervalTime);
+        }
+        
         function stopLoopCheck() {
             if (loopTimer) {
                 clearInterval(loopTimer);
