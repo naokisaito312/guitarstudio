@@ -590,6 +590,7 @@
                     if (callback) callback(); // フェードアウト完了後に巻き戻しを実行
                 } else {
                     player.setVolume(Math.round(currentVolume));
+                    if (pElement) pElement.style.opacity = (currentVolume / 100); // ★画面もじわじわ暗く
                 }
             }, intervalTime);
         }
@@ -619,6 +620,7 @@
                     if (callback) callback(); // 全工程終了
                 } else {
                     player.setVolume(Math.round(currentVolume));
+                    if (pElement) pElement.style.opacity = (currentVolume / 100); // ★画面もじわじわ明るく
                 }
             }, intervalTime);
         }
