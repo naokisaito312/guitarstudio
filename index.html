@@ -526,38 +526,37 @@
             return m + ":" + (s < 10 ? "0" : "") + s;
         }
 
-        // --- 修正版：3秒フェードアウト ➔ 3秒前ジャンプ ➔ 3秒フェードイン付きループ監視 ---
-        var isLoopSequence = false; // フェードアウト〜巻き戻しの一連の処理中かどうかのフラグ
+        // --- 3秒フェードアウト ➔ 3秒前ジャンプ ➔ 3秒フェードイン付きループ監視（ピコ音追加） ---
+        var isLoopSequence = false; 
 
         function startLoopCheck() {
             if (loopTimer) {
                 clearInterval(loopTimer);
-                null;
+                loopTimer = null;
             }
             
             loopTimer = setInterval(function() {
                 if (!player || typeof player.getCurrentTime !== 'function') return;
 
-                // 一連のループ処理中でない場合のみB点の到達チェックを行う
                 if (pointA !== null && pointB !== null && !isLoopSequence) {
                     var currentTime = player.getCurrentTime();
                     
                     if (currentTime >= 0 && currentTime >= pointB) {
-                        isLoopSequence = true; // 多重発動防止フラグをオン
+                        isLoopSequence = true; 
                         
-                        // ① まずはその場で音量を3秒かけて下げる（フェードアウト開始）
+                        // ★【ここを追加】B点に達したまさにその瞬間に「ピコッ」と鳴らす
+                        playPikoSound();
+                        
+                        // そのまま3秒間のフェードアウトへ移行
                         startFadeOut(function() {
-                            // ② フェードアウトが完全に終わったら（3秒後）、A点の「3秒前」を計算してジャンプ
-                            var preRollTime = pointA - 2;
+                            var preRollTime = pointA - 3;
                             if (preRollTime < 0) {
                                 preRollTime = 0;
                             }
                             player.seekTo(preRollTime, true);
                             
-                            // ③ 音量を0にした状態から、3秒かけてフェードイン
                             player.setVolume(0);
                             startFadeIn(function() {
-                                // ④ すべてのフェード処理が終わったら、次のループのためにフラグを解除
                                 isLoopSequence = false;
                             });
                         });
@@ -615,6 +614,38 @@
                     player.setVolume(Math.round(currentVolume));
                 }
             }, intervalTime);
+        }
+
+        // --- ループ折り返し時の「ピコッ」という電子音を作る関数 ---
+        function playPikoSound() {
+            // AudioContextが初期化されていない場合は作成
+            if (!audioCtx) {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            }
+            if (audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+
+            var now = audioCtx.currentTime;
+            var osc = audioCtx.createOscillator();
+            var gainNode = audioCtx.createGain();
+
+            osc.connect(gainNode);
+            gainNode.connect(audioCtx.destination);
+
+            // 音色の設定（四角波 'square' や 三角波 'triangle' にするとレトロゲーム風になります。ここではクリアな 'sine'）
+            osc.type = 'sine';
+
+            // 「ピ（1200Hz）」から「コ（1500Hz）」へ高速にピッチを跳ね上げる（ピコッ感を出す）
+            osc.frequency.setValueAtTime(1200, now);
+            osc.frequency.setValueAtTime(1500, now + 0.04);
+
+            // 音量の設定（0.08秒で一瞬で消えるようにして、歯切れの良さを出す）
+            gainNode.gain.setValueAtTime(0.15, now); // 音量
+            gainNode.gain.exponentialRampToValueAtTime(0.001, now + 0.08);
+
+            osc.start(now);
+            osc.stop(now + 0.09);
         }
         
         function stopLoopCheck() {
