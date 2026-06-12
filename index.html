@@ -526,43 +526,56 @@
             return m + ":" + (s < 10 ? "0" : "") + s;
         }
 
-        // --- カウントイン機能付きループ監視（多重起動・連打完全防止版） ---
+        // --- カウントイン機能付きループ監視（時間同期・確定対策版） ---
         var isCountingIn = false; // カウントイン中かどうかを管理するフラグ
 
         function startLoopCheck() {
-            // すでに古いタイマーがある場合は、安全のために一度完全に破棄する
             if (loopTimer) {
                 clearInterval(loopTimer);
                 loopTimer = null;
             }
             
-            // タイマーを1つだけ新規起動
             loopTimer = setInterval(function() {
                 if (!player || typeof player.getCurrentTime !== 'function') return;
 
-                // ★【超重要ガード】すでにカウントイン中なら、タイマーの連打処理をすべて完全に無視する
                 if (isCountingIn) return;
 
-                // A点とB点が両方設定されている場合のみチェック
                 if (pointA !== null && pointB !== null) {
                     var currentTime = player.getCurrentTime();
                     
                     if (currentTime >= 0 && currentTime >= pointB) {
-                        // 1. 2回目が絶対に呼ばれないよう、最優先でカウントインフラグを立てる
                         isCountingIn = true;
                         countInBeats = 0; 
                         
-                        // 2. 動画をA点に戻して、確実に一時停止
                         player.seekTo(pointA, true);
                         player.pauseVideo();
 
-                        // 3. メトロノームが鳴っていなければ自動起動
-                        if (!isMetroPlaying) {
-                            toggleMetronome();
+                        // ★【ここを完全修正：メトロノームの時間を厳密に初期化】
+                        if (!audioCtx) {
+                            audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                        }
+                        if (audioCtx.state === 'suspended') {
+                            audioCtx.resume();
                         }
 
-                        // 4. 次の拍のタイミングが必ず「1拍目（beatNumber = 0）」から始まるようにリセット
+                        // 1. メトロノームを「再生中」にする
+                        isMetroPlaying = true;
+
+                        // 2. ご指摘のバグを回避：次の音の時間を「今この瞬間」に完璧に同期する
+                        // これにより、scheduler内のwhileが過去の遅れをリセットし、多重発報を100%防ぎます
+                        nextNoteTime = audioCtx.currentTime + 0.02; 
+                        
+                        // 3. 確実に1拍目（beatNumber = 0 / ぴ音）からスタート
                         currentBeat = 0;
+
+                        // 4. GUI（LEDとボタン）を点灯状態にする
+                        var led = document.getElementById('metroLed');
+                        var btn = document.getElementById('metroBtn');
+                        if (led) led.classList.add('on');
+                        if (btn) btn.style.borderColor = '#ff3b30';
+
+                        // 5. 高精度スケジューラーを起動
+                        scheduler();
                     }
                 }
             }, 100);
