@@ -448,32 +448,41 @@
         }
 
         // 通常クリック時の挙動
+        // --- 補正機能付き：A/Bボタンクリック時の処理 ---
         function handleButtonClick(type) {
             if (!player || typeof player.getCurrentTime !== 'function') return;
-            var currentTime = player.getCurrentTime();
 
-            if (type === 'A') {
-                if (pointA === null) {
-                    // A点が未設定の場合は、その地点をA点に設定
-                    pointA = currentTime;
-                    updateButtonUI('A');
-                } else {
-                    // A点が設定済みの場合は、A点から再生を開始
-                    player.seekTo(pointA, true);
+            var val = (type === 'A') ? pointA : pointB;
+
+            if (val === null) {
+                // 現在の動画の再生時間を取得
+                var rawTime = player.getCurrentTime();
+                
+                // ★【ここがポイント：タイムラグ補正】
+                // ボタンを押したタイミングより「0.25秒」手前の時間を記録する
+                var correctedTime = rawTime - 0.25;
+                
+                // マイナス秒（動画の開始前）になってしまわないように、0秒未満は0秒に固定する
+                if (correctedTime < 0) {
+                    correctedTime = 0;
                 }
-            } else if (type === 'B') {
-                if (pointB === null) {
-                    // B点が未設定の場合は、その地点をB点に設定
-                    if (pointA !== null && currentTime <= pointA) {
-                        alert('B点はA点より後ろの時間に設定してください。');
-                        return;
-                    }
-                    pointB = currentTime;
-                    updateButtonUI('B');
+
+                // 補正した時間を変数に代入
+                if (type === 'A') {
+                    pointA = correctedTime;
                 } else {
-                    // B点が設定済みの場合は、B点から再生を開始（通常はA-Bループ中ですが単体ジャンプも可能に）
-                    player.seekTo(pointB, true);
+                    pointB = correctedTime;
                 }
+                
+                updateButtonUI(type);
+
+                // A点とB点が揃ったら自動でループチェックを開始
+                if (pointA !== null && pointB !== null) {
+                    startLoopCheck();
+                }
+            } else {
+                // すでに設定されている場合は、その時間へジャンプ
+                player.seekTo(val, true);
             }
         }
 
