@@ -548,7 +548,7 @@
                         // ① まずはその場で音量を3秒かけて下げる（フェードアウト開始）
                         startFadeOut(function() {
                             // ② フェードアウトが完全に終わったら（3秒後）、A点の「3秒前」を計算してジャンプ
-                            var preRollTime = pointA - 3;
+                            var preRollTime = pointA - 2;
                             if (preRollTime < 0) {
                                 preRollTime = 0;
                             }
@@ -569,7 +569,7 @@
         // --- 音を滑らかにフェードアウトさせる関数 ---
         function startFadeOut(callback) {
             var currentVolume = 100; // 現在の音量（最大）
-            var duration = 3000;    // 3秒かけてフェードアウト
+            var duration = 2000;    // 3秒かけてフェードアウト
             var intervalTime = 50;  // 50ミリ秒ごとに音量を更新
             var step = currentVolume / (duration / intervalTime); // 1回あたりの音量減少量
 
@@ -595,7 +595,7 @@
         function startFadeIn(callback) {
             var targetVolume = 100; // 最終的な音量（最大）
             var currentVolume = 0;
-            var duration = 3000;   // 3秒かけてフェードイン
+            var duration = 2000;   // 3秒かけてフェードイン
             var intervalTime = 50; // 50ミリ秒ごとに音量を更新
             var step = targetVolume / (duration / intervalTime); // 1回あたりの音量増加量
 
