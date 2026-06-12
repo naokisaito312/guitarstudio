@@ -525,8 +525,9 @@
                     var currentTime = player.getCurrentTime();
                     
                     if (currentTime >= 0 && currentTime >= pointB) {
-                        // 1. カウントインフラグを立てる
+                        // 1. カウントインフラグを立て、拍数カウンターをリセット
                         isCountingIn = true;
+                        countInBeats = 0; 
                         
                         // 2. 動画をA点に戻して、確実に一時停止
                         player.seekTo(pointA, true);
@@ -696,6 +697,9 @@
             currentBeat = (currentBeat + 1) % 4; // 4拍子ループ
         }
 
+        // カウントイン中に鳴った拍数を数えるグローバル変数（関数の外、または直前に配置してもOKです）
+        var countInBeats = 0; 
+
         // 実際に電子音を作る関数
         function scheduleNote(beatNumber, time) {
             if (!isMetroPlaying) return;
@@ -741,19 +745,25 @@
                 }
             }, (time - audioCtx.currentTime) * 1000);
 
-            // カウントイン中の場合、拍数をカウントして1小節分（4拍）終わったら動画を再生する
+            // ★【ここを修正】カウントイン中の場合、拍数を正確に4回数えてから動画を再生する
             if (isCountingIn) {
-                // 音が鳴るタイミング（time）に合わせて、正確に動画再生とフラグ解除を予約
-                var playDelay = (time - audioCtx.currentTime) * 1000;
-                setTimeout(function() {
-                    // 4拍叩き終わった次の1拍目の音が鳴る直前のタイミング（beatNumberが0に戻った時）
-                    if (beatNumber === 0) {
-                        isCountingIn = false; // カウントイン終了
-                        if (player && typeof player.playVideo === 'function') {
-                            player.playVideo(); // 動画再生開始！
+                countInBeats++; // 鳴った拍数をインクリメント
+                
+                // 4拍（1、2、3、4）鳴り終わった瞬間のタイミングを計算
+                if (countInBeats === 4) {
+                    var playDelay = (time - audioCtx.currentTime) * 1000;
+                    
+                    // 次の小節の頭（5拍目の直前）で正確に動画をリスタート
+                    setTimeout(function() {
+                        if (isCountingIn) { // 念のためまだカウントイン中か確認
+                            isCountingIn = false; // カウントイン終了
+                            countInBeats = 0;     // カウンターをリセット
+                            if (player && typeof player.playVideo === 'function') {
+                                player.playVideo(); // 動画再生開始！
+                            }
                         }
-                    }
-                }, playDelay);
+                    }, playDelay);
+                }
             }
         }
 
