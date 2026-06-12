@@ -252,6 +252,39 @@
             background: linear-gradient(180deg, #4a4a57 0%, #2f2f38 100%);
             color: #fff;
         }
+
+        /* メトロノームボタンとLEDのスタイル */
+        .btn.metro-btn {
+            width: 80px;
+            height: 48px;
+            font-size: 10px;
+            border-radius: 6px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            gap: 4px;
+        }
+        
+        /* 物理的なLEDランプを再現 */
+        .metro-led {
+            width: 8px;
+            height: 8px;
+            background-color: #333; /* 消灯時はダークグレー */
+            border-radius: 50%;
+            transition: all 0.2s;
+            box-shadow: inset 0 1px 2px rgba(0,0,0,0.5);
+        }
+        
+        /* メトロノームON時（待機中）のうっすらした点灯 */
+        .metro-led.on {
+            background-color: #990000; /* 鈍い赤 */
+        }
+        
+        /* 音が鳴った瞬間の強烈なフラッシュ（JSで制御） */
+        .metro-led.flash {
+            transform: scale(1.1);
+        }
     </style>
 </head>
 <body>
@@ -293,6 +326,10 @@
         </div>
 
         <div class="tap-panel">
+            <button class="btn metro-btn" id="metroBtn" onclick="toggleMetronome()">
+                METRO (M)
+                <span class="metro-led" id="metroLed"></span>
+            </button>
             <div class="tap-display" id="bpmDisplay">BPM<br><span>---</span></div>
             <button class="btn tap-btn" id="tapBtn" onmousedown="tapBPM()">TAP (T)</button>
         </div>
@@ -577,6 +614,120 @@
                 tapBtn.style.background = ''; // 元のCSSに戻す
             }, 50);
         }
+
+        // --- メトロノームのロジック ---
+        var audioCtx = null;
+        var metroTimer = null;
+        var isMetroPlaying = false;
+        var currentBeat = 0;
+        var nextNoteTime = 0.0; // 次の音が鳴るべき絶対時間（秒）
+        var scheduleAheadTime = 0.1; // どれくらい未来までスケジュールするか（秒）
+        var lookahead = 25.0; // 次のチェックまでの間隔（ミリ秒）
+
+        function toggleMetronome() {
+            // 最初の一歩でオーディオコンテキストを初期化（ブラウザのセキュリティ対策）
+            if (!audioCtx) {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            }
+
+            if (pointA === null && pointB === null && (!player || typeof player.getPlayerState !== 'function' || player.getPlayerState() !== YT.PlayerState.PLAYING)) {
+                // 音声再生の有効化のため一度動かす
+                if (audioCtx.state === 'suspended') audioCtx.resume();
+            }
+
+            isMetroPlaying = !isMetroPlaying;
+            var led = document.getElementById('metroLed');
+            var btn = document.getElementById('metroBtn');
+
+            if (isMetroPlaying) {
+                // BPMがまだ計測されていない場合はデフォルト120にする
+                var currentBPM = parseInt(document.querySelector('#bpmDisplay span').textContent);
+                if (isNaN(currentBPM)) {
+                    currentBPM = 120;
+                    var bpmSpan = document.querySelector('#bpmDisplay span');
+                    bpmSpan.textContent = currentBPM;
+                    bpmSpan.style.color = '#ff3b30';
+                }
+
+                currentBeat = 0;
+                nextNoteTime = audioCtx.currentTime + 0.05;
+                scheduler(); // スケジューラ開始
+                
+                led.classList.add('on');
+                btn.style.borderColor = '#ff3b30';
+            } else {
+                if (metroTimer) clearTimeout(metroTimer);
+                led.classList.remove('on');
+                led.classList.remove('flash');
+                btn.style.borderColor = '';
+            }
+        }
+
+        // 高精度タイマーのためのスケジューラー（バックグラウンドでのズレを防ぐ仕組み）
+        function scheduler() {
+            while (nextNoteTime < audioCtx.currentTime + scheduleAheadTime) {
+                scheduleNote(currentBeat, nextNoteTime);
+                advanceNote();
+            }
+            metroTimer = setTimeout(scheduler, lookahead);
+        }
+
+        function advanceNote() {
+            var currentBPM = parseInt(document.querySelector('#bpmDisplay span').textContent) || 120;
+            var secondsPerBeat = 60.0 / currentBPM;
+            nextNoteTime += secondsPerBeat; // 次の拍の時間を計算
+
+            currentBeat = (currentBeat + 1) % 4; // 4拍子ループ
+        }
+
+        // 実際に電子音を作る関数
+        function scheduleNote(beatNumber, time) {
+            if (!isMetroPlaying) return;
+
+            var osc = audioCtx.createOscillator();
+            var gainNode = audioCtx.createGain();
+            osc.connect(gainNode);
+            gainNode.connect(audioCtx.destination);
+
+            // 1拍目は高音(880Hz)、2,3,4拍子は低音(440Hz)
+            if (beatNumber === 0) {
+                osc.frequency.setValueAtTime(880, time);
+            } else {
+                osc.frequency.setValueAtTime(440, time);
+            }
+
+            // 音の長さ（歯切れの良い0.05秒のクリック音）
+            gainNode.gain.setValueAtTime(0.3, time); // 音量
+            gainNode.gain.exponentialRampToValueAtTime(0.001, time + 0.05);
+
+            osc.start(time);
+            osc.stop(time + 0.06);
+
+            // 視覚的フィードバック：音に合わせてLEDを一瞬光らせる
+            setTimeout(function() {
+                var led = document.getElementById('metroLed');
+                if (led && isMetroPlaying) {
+                    led.classList.add('flash');
+                    if (beatNumber === 0) {
+                        led.style.background = '#ff3b30'; // 1拍目は赤
+                        led.style.boxShadow = '0 0 10px #ff3b30';
+                    } else {
+                        led.style.background = '#00ffcc'; // 2,3,4拍目は緑
+                        led.style.boxShadow = '0 0 10px #00ffcc';
+                    }
+                    setTimeout(function() {
+                        led.classList.remove('flash');
+                        if (isMetroPlaying) {
+                            led.style.background = '#990000'; // 待機状態の暗い赤
+                            led.style.boxShadow = 'none';
+                        }
+                    }, 40);
+                }
+            }, (time - audioCtx.currentTime) * 1000);
+        }
+
+        // TAP BPMが更新された時に、動的にメトロノームの速度も追従させるための処理
+        // 既存の tapBPM() 関数の最後のほう、bpmSpan.textContent = bpm; のすぐ下あたりに「if(isMetroPlaying) { /* 何もしなくてOK（自動追従します） */ }」となるよう、念のため既存のロジックと統合されています。
         // --- キーボード操作の制御 ---
         window.addEventListener('keydown', function(event) {
             // URL入力欄（input）にフォーカスがある場合は、キーボードショートカットを無効化する
@@ -622,6 +773,12 @@
                 case 'T':
                     tapBPM();
                     break;
+
+                case 'm': // Mキー（小文字・大文字両対応）
+                case 'M':
+                    toggleMetronome();
+                    break;
+                
                 default:
                     return; // その他のキーは何もしない
             }
