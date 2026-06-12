@@ -460,7 +460,7 @@
                 
                 // ★【ここがポイント：タイムラグ補正】
                 // ボタンを押したタイミングより「0.15秒」手前の時間を記録する
-                var correctedTime = rawTime - 0.15;
+                var correctedTime = rawTime - 0.20;
                 
                 // マイナス秒（動画の開始前）になってしまわないように、0秒未満は0秒に固定する
                 if (correctedTime < 0) {
