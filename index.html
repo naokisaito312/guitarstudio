@@ -759,9 +759,10 @@
                             isCountingIn = false; // カウントイン終了
                             countInBeats = 0;     // カウンターをリセット
                             
-                            // ★【ここを追加】動画再開の瞬間に、メトロノームのタイマーも今この瞬間に完全にリセットする
-                            nextNoteTime = audioCtx.currentTime;
-                            currentBeat = 0; // 確実に1拍目(ピ音)からスタートさせる
+                            // ★【ここを修正】動画が始まる瞬間に、メトロノームを強制停止（OFF）にする
+                            if (isMetroPlaying) {
+                                toggleMetronome(); // メトロノームをOFFにする（LEDも自動で消灯します）
+                            }
                             
                             if (player && typeof player.playVideo === 'function') {
                                 player.playVideo(); // 動画再生開始！
