@@ -78,7 +78,6 @@
             left: 0;
             width: 100%;
             height: 100%;
-            transition: opacity 0.05s linear;
         }
         
         /* エフェクターのコントロールパネル（シャーシ） */
@@ -585,8 +584,6 @@
             var intervalTime = 50;  // 50ミリ秒ごとに音量を更新
             var step = currentVolume / (duration / intervalTime); // 1回あたりの音量減少量
 
-            var pElement = document.getElementById('player'); // ★動画要素を取得
-            
             var fadeOutTimer = setInterval(function() {
                 if (!player || typeof player.setVolume !== 'function') {
                     clearInterval(fadeOutTimer);
@@ -597,7 +594,6 @@
                 currentVolume -= step;
                 if (currentVolume <= 0) {
                     player.setVolume(0);
-                    if (pElement) pElement.style.opacity = 0; // ★完全に真っ暗にする
                     clearInterval(fadeOutTimer);
                     if (callback) callback(); // フェードアウト完了後に巻き戻しを実行
                 } else {
@@ -614,8 +610,6 @@
             var intervalTime = 50; // 50ミリ秒ごとに音量を更新
             var step = targetVolume / (duration / intervalTime); // 1回あたりの音量増加量
 
-            var pElement = document.getElementById('player'); // ★動画要素を取得
-            
             var fadeInTimer = setInterval(function() {
                 if (!player || typeof player.setVolume !== 'function') {
                     clearInterval(fadeInTimer);
@@ -626,7 +620,6 @@
                 currentVolume += step;
                 if (currentVolume >= targetVolume) {
                     player.setVolume(targetVolume);
-                    if (pElement) pElement.style.opacity = 1; // ★完全に100%表示にす
                     clearInterval(fadeInTimer);
                     if (callback) callback(); // 全工程終了
                 } else {
