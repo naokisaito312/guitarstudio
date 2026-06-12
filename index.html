@@ -688,6 +688,13 @@
                 btn.style.borderColor = '#ff3b30';
             } else {
                 if (metroTimer) clearTimeout(metroTimer);
+                
+                // ★【ここを追記】手動停止時も予約された音をクリア
+                activeOscillators.forEach(function(activeOsc) {
+                    try { activeOsc.stop(); } catch(e) {}
+                });
+                activeOscillators = [];
+
                 led.classList.remove('on');
                 led.classList.remove('flash');
                 btn.style.borderColor = '';
