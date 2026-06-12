@@ -616,36 +616,46 @@
             }, intervalTime);
         }
 
-        // --- ループ折り返し時の「ピコッ」という電子音を作る関数（エラー回避版） ---
+        // --- ループ折り返し時の「ピコッ」という電子音（ブラウザ制限完全解除版） ---
         function playPikoSound() {
-            // グローバル宣言されている audioCtx と競合しないよう安全に初期化
-            if (!audioCtx) {
-                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            try {
+                // 1. audioCtx が存在しない場合は、最優先で新しく作成する
+                if (!audioCtx) {
+                    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                }
+                
+                // 2. ★【最重要】ブラウザのセキュリティ制限（サスペンド状態）を強制的に解除（アクティブ化）する
+                if (audioCtx.state === 'suspended') {
+                    audioCtx.resume();
+                }
+
+                // 3. 音を生成する準備
+                var now = audioCtx.currentTime;
+                var osc = audioCtx.createOscillator();
+                var gainNode = audioCtx.createGain();
+
+                osc.connect(gainNode);
+                gainNode.connect(audioCtx.destination);
+
+                // サウンドタイプをクリアなサイン波に設定
+                osc.type = 'sine';
+
+                // 「ピ（1200Hz）」から「コ（1600Hz）」へ超高速で跳ね上げる設定
+                osc.frequency.setValueAtTime(1200, now);
+                osc.frequency.setValueAtTime(1600, now + 0.04);
+
+                // 音量とキレの調整（0.1秒で綺麗に消えるように）
+                // ※音が聞こえやすいように、少しだけ音量を大きめ（0.3）に調整しました
+                gainNode.gain.setValueAtTime(0.3, now); 
+                gainNode.gain.exponentialRampToValueAtTime(0.001, now + 0.08);
+
+                // 発音開始と停止
+                osc.start(now);
+                osc.stop(now + 0.1);
+                
+            } catch (e) {
+                console.log("Audio Error:", e); // 万が一エラーが出た場合はコンソールに記録
             }
-            if (audioCtx.state === 'suspended') {
-                audioCtx.resume();
-            }
-
-            var now = audioCtx.currentTime;
-            var osc = audioCtx.createOscillator();
-            var gainNode = audioCtx.createGain();
-
-            osc.connect(gainNode);
-            gainNode.connect(audioCtx.destination);
-
-            // サウンドタイプをクリアなサイン波に
-            osc.type = 'sine';
-
-            // 「ピ（1200Hz）」から「コ（1600Hz）」へ超高速で跳ね上げる
-            osc.frequency.setValueAtTime(1200, now);
-            osc.frequency.setValueAtTime(1600, now + 0.04);
-
-            // 音量とキレの調整（0.08秒で綺麗に消えるように）
-            gainNode.gain.setValueAtTime(0.2, now); // 少しだけ音量を聴こえやすくアップ
-            gainNode.gain.exponentialRampToValueAtTime(0.001, now + 0.08);
-
-            osc.start(now);
-            osc.stop(now + 0.09);
         }
 
         // --- 音を滑らかにフェードアウトさせる関数 ---
