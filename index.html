@@ -768,20 +768,34 @@
                             isCountingIn = false; // カウントイン終了
                             countInBeats = 0;     // カウンターをリセット
                             
-                            // メトロノームを強制停止（OFF）にする
-                            if (isMetroPlaying) {
-                                toggleMetronome(); // ここでisMetroPlayingがfalseになり、タイマーも止まります
-                            }
-                            
-                            // ★【ここを追加】裏で先読み予約されてしまった音を完全に消し去る
+                            // ★【ここを完全修正：順番と処理を最適化】
+                            // 1. まずWeb Audio APIの先読みタイマー(setTimeout)を最優先で完全に破壊・停止する
                             if (metroTimer) {
                                 clearTimeout(metroTimer);
+                                metroTimer = null;
                             }
-                            // 拍のカウントも初期化
-                            currentBeat = 0;
                             
+                            // 2. メトロノームを内部的に停止状態にし、LEDを消灯する
+                            isMetroPlaying = false;
+                            var led = document.getElementById('metroLed');
+                            var btn = document.getElementById('metroBtn');
+                            if (led) {
+                                led.classList.remove('on');
+                                led.classList.remove('flash');
+                                led.style.background = '#333'; // 消灯色(ダークグレー)に強制リセット
+                                led.style.boxShadow = 'none';
+                            }
+                            if (btn) {
+                                btn.style.borderColor = '';
+                            }
+                            
+                            // 3. 次回のカウントインが綺麗な「2拍目の ぽ (beatNumber = 1)」から予約されるように仕込む
+                            //（これで再起動時に1拍目の「ぴ」が重複して暴発するのを完璧に防ぎます）
+                            currentBeat = 1; 
+                            
+                            // 4. 満を持して動画の再生を開始
                             if (player && typeof player.playVideo === 'function') {
-                                player.playVideo(); // 動画再生開始！
+                                player.playVideo();
                             }
                         }
                     }, playDelay);
