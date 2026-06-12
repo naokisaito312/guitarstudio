@@ -344,6 +344,8 @@
         var player;
         var defaultVideoId = 'dQw4w9WgXcQ'; 
 
+        var audioCtx = null;
+        
         // ループ制御用の変数
         var pointA = null;
         var pointB = null;
@@ -829,7 +831,6 @@
         }
 
         // --- メトロノームのロジック ---
-        var audioCtx = null;
         var metroTimer = null;
         var isMetroPlaying = false;
         var currentBeat = 0;
