@@ -963,22 +963,14 @@
                     skip(10);
                     break;
 
-                case 'F8';
                 case 'a':
                 case 'A':
-                    // ★【修正】キーボードが「押された時」は短押し処理ではなく、
-                    // 画面のボタンが踏まれた時と同じ「押下イベント」を発生させます。
-                    if (!event.repeat) { // 前回入れた連打バグ防止
-                        startPress('A');
-                    }
+                    startPress('A');
                     break;
 
-                case 'F9':
                 case 'b':
                 case 'B':
-                    if (!event.repeat) {
-                        startPress('B');
-                    }
+                    startPress('B');
                     break;
 
                 case 's': // Sキー
