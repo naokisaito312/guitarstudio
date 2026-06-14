@@ -973,14 +973,11 @@
                     handleButtonClick('B');
                     break;
 
-                case 'ArrowDown': // 下矢印キーで減速
-                    changeSpeed(-1);
+                case 's': // Sキー
+                case 'S':
+                    toggleSpeed();
                     break;
                     
-                case 'ArrowUp': // 上矢印キーで加速
-                    changeSpeed(1);
-                    break;
-
                 case 't': // Tキー（小文字・大文字両対応）
                 case 'T':
                     tapBPM();
