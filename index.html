@@ -442,7 +442,11 @@
 
         // ボタンが離された時
         function endPress(type) {
+            // ★【追記】もし押された形跡（タイマー）がなければ、離された処理を完全に無視する
+            if (!pressTimer) return; 
+
             clearTimeout(pressTimer); // タイマーを解除
+            pressTimer = null;        // タイマーを完全に空にする（重要）
             
             // 長押し判定になっていなければ、通常のクリック処理
             if (!isLongPress) {
@@ -946,7 +950,9 @@
             if (document.activeElement.tagName === 'INPUT') {
                 return;
             }
-        
+
+            if (event.repeat) return;
+            
             switch (event.key) {
                 case ' ': // スペースキー
                     event.preventDefault(); // 画面のスクロールを防止
@@ -965,12 +971,16 @@
 
                 case 'a':
                 case 'A':
-                    startPress('A');
+                    if (!event.repeat && !pressTimer) { 
+                        startPress('A');
+                    }
                     break;
 
                 case 'b':
                 case 'B':
-                    startPress('B');
+                    if (!event.repeat && !pressTimer) { 
+                        startPress('B');
+                    }
                     break;
 
                 case 's': // Sキー
