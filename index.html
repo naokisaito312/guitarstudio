@@ -321,8 +321,7 @@
         <div class="speed-panel">
             <div class="speed-display" id="speedDisplay">SPEED<br><span>1.0x</span></div>
             <div class="speed-buttons">
-                <button class="btn speed-btn" onclick="changeSpeed(1)">SPEED +</button>
-                <button class="btn speed-btn" onclick="changeSpeed(-1)">SPEED -</button>
+                <button class="btn speed-btn" style="height: 48px;" onclick="toggleSpeed()">SPEED</button>
             </div>
         </div>
 
@@ -674,29 +673,44 @@
             stopLoopCheck();
         }
 
-        // --- 再生速度コントロールのロジック ---
-        // YouTubeがサポートしている標準的な再生速度のリスト
-        var speedRates = [0.25, 0.5, 0.75, 1.0, 1.25, 1.5, 1.75, 2.0];
-        var currentSpeedIndex = 3; // デフォルトは 1.0 (配列の3番目)
+        // --- 再生速度コントロールのロジック（通常 -> 0.75 -> 0.5 ループ仕様） ---
+        var speedRates = [1.0, 0.75, 0.5];
+        var currentSpeedIndex = 0; // 初期値は 1.0x
 
-        function changeSpeed(direction) {
+        // ボタンを押した時のループ切り替え関数
+        function toggleSpeed() {
             if (!player || typeof player.setPlaybackRate !== 'function') return;
 
-            // インデックスを増減
-            currentSpeedIndex += direction;
+            // 次の速度へ（配列の最後までいったら0に戻る）
+            currentSpeedIndex = (currentSpeedIndex + 1) % speedRates.length;
+            
+            applySpeed();
+        }
 
-            // 最小値と最大値の範囲内に収める
-            if (currentSpeedIndex < 0) currentSpeedIndex = 0;
-            if (currentSpeedIndex >= speedRates.length) currentSpeedIndex = speedRates.length - 1;
+        // キーボード操作（上下矢印）でも連動できるようにする互換用関数
+        function changeSpeed(direction) {
+            if (!player || typeof player.setPlaybackRate !== 'function') return;
+            
+            // 上矢印なら前の速度、下矢印なら次の速度へ
+            if (direction > 0) {
+                currentSpeedIndex = (currentSpeedIndex - 1 + speedRates.length) % speedRates.length;
+            } else {
+                currentSpeedIndex = (currentSpeedIndex + 1) % speedRates.length;
+            }
+            
+            applySpeed();
+        }
 
+        // 実際にYouTubeとディスプレイ画面に速度を適用する処理
+        function applySpeed() {
             var targetSpeed = speedRates[currentSpeedIndex];
             player.setPlaybackRate(targetSpeed);
 
             // 速度ディスプレイの表示を更新
             var displaySpan = document.querySelector('#speedDisplay span');
-            displaySpan.textContent = targetSpeed.toFixed(2) + "x";
+            displaySpan.textContent = targetSpeed === 1.0 ? "1.0x" : targetSpeed.toFixed(2) + "x";
 
-            // 標準(1.0x)以外のときは液晶の文字をネオンオレンジっぽくして警告灯を演出
+            // 通常(1.0x)以外のときは文字をオレンジにして変更中であることを分かりやすく
             if (targetSpeed === 1.0) {
                 displaySpan.style.color = '#00ffcc'; // 通常グリーン
             } else {
