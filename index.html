@@ -194,24 +194,31 @@
             left: 0;
             right: 0;
             top: 20px; /* 「SPEED」文字の下に配置 */
-            /* ↓ 上下にシャキッとスライドさせるアニメーション設定 */
             transition: transform 0.25s cubic-bezier(0.25, 1, 0.5, 1);
         }
         
         /* 帯の中の各スピード数字 */
         .speed-reel-item {
             font-size: 18px;
-            color: #ff9900; /* 基本はテンポ変更中オレンジ */
+            color: #ff9900;
             font-weight: bold;
-            height: 24px;   /* 1項目あたりの高さを均一に固定 */
+            height: 24px;
             line-height: 24px;
             text-shadow: 0 0 5px rgba(255,153,0,0.3);
+            /* ★【追加】標準状態（選ばれていない時）はフェードアウトして消す */
+            opacity: 0;
+            transition: opacity 0.2s ease, text-shadow 0.2s ease;
         }
         
-        /* 1.0x（通常）の時だけネオン常連グリーンにする設定 */
-        .speed-reel-item.default-speed {
+        /* ★【新規追加】現在選ばれている速度（アクティブ）だけを表示する */
+        .speed-reel-item.active {
+            opacity: 1;
+        }
+        
+        /* 1.0x かつ アクティブな時だけグリーンに光らせる */
+        .speed-reel-item.default-speed.active {
             color: #00ffcc;
-            text-shadow: 0 0 5px rgba(0,255,204,0.3);
+            text-shadow: 0 0 5px rgba(0,255,204,0.5);
         }
 
         /* 速度調整ボタンのレイアウト調整 */
@@ -733,17 +740,28 @@
             applySpeed();
         }
 
-        // 実際にYouTubeとディスプレイ画面に速度を適用する処理（縦スライド・リール仕様）
+        // 実際にYouTubeとディスプレイ画面に速度を適用する処理（選択値以外フェードアウト仕様）
         function applySpeed() {
             var targetSpeed = speedRates[currentSpeedIndex];
             player.setPlaybackRate(targetSpeed);
 
-            // ★【修正】文字の書き換えではなく、リール全体を上にスライドさせる
+            // リール全体を上にスライドさせる
             var reel = document.getElementById('speedReel');
             if (reel) {
-                // 1項目あたりの高さ（24px）ずつ、インデックスに応じて上方向（マイナス）にずらす
                 var offset = currentSpeedIndex * 24;
                 reel.style.transform = 'translateY(-' + offset + 'px)';
+
+                // ★【追加】リール内のすべてのアイテムを取得
+                var items = reel.getElementsByClassName('speed-reel-item');
+                for (var i = 0; i < items.length; i++) {
+                    if (i === currentSpeedIndex) {
+                        // 現在選ばれている数字だけに active をつけてフェードイン
+                        items[i].classList.add('active');
+                    } else {
+                        // それ以外の数字からは active を外してフェードアウト
+                        items[i].classList.remove('active');
+                    }
+                }
             }
         }
 
