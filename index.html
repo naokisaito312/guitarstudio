@@ -962,17 +962,23 @@
                     event.preventDefault();
                     skip(10);
                     break;
-                    
 
+                case 'F8';
                 case 'a':
                 case 'A':
-                    handleButtonClick('A');
+                    // ★【修正】キーボードが「押された時」は短押し処理ではなく、
+                    // 画面のボタンが踏まれた時と同じ「押下イベント」を発生させます。
+                    if (!event.repeat) { // 前回入れた連打バグ防止
+                        startPress('A');
+                    }
                     break;
-                    
 
+                case 'F9':
                 case 'b':
                 case 'B':
-                    handleButtonClick('B');
+                    if (!event.repeat) {
+                        startPress('B');
+                    }
                     break;
 
                 case 's': // Sキー
@@ -992,6 +998,24 @@
                 
                 default:
                     return; // その他のキーは何もしない
+            }
+        });
+        // ★【新規追記】キーボードやフットペダルを「離した瞬間」を検知するイベント
+        window.addEventListener('keyup', function(event) {
+            if (document.activeElement.tagName === 'INPUT') {
+                return;
+            }
+        
+            switch (event.key) {
+                case 'a':
+                case 'A':
+                    endPress('A'); // Aキーを離したら、短押し確定か長押し終了を判定
+                    break;
+                    
+                case 'b':
+                case 'B':
+                    endPress('B'); // Bキーを離したら、短押し確定か長押し終了を判定
+                    break;
             }
         });
     </script>
