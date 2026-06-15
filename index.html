@@ -593,23 +593,90 @@
             player.seekTo(newTime, true);
         }
 
-        function changeVideo() {
-            var input = document.getElementById('videoUrl').value.trim();
+        // --- YouTubeロード ＆ 履歴保存ロジック（完全に統合） ---
+        var videoHistory = [];
+        var MAX_HISTORY = 8;
+
+        // HTML側の「LOAD」ボタンから呼び出される関数
+        function loadVideo() {
+            // 正しい入力欄ID「videoIdInput」からURLまたはIDを取得
+            var input = document.getElementById('videoIdInput').value.trim();
             if (!input) return;
+            
             var videoId = extractVideoId(input);
             
             if (videoId && player && typeof player.loadVideoById === 'function') {
                 player.loadVideoById(videoId);
-                resetLoopSettings();
+                resetLoopSettings(); // 動画が変わったらループ設定をリセット
+                
+                // 読み込みに成功したら履歴へ保存
+                saveToHistory(videoId);
             } else {
                 alert('有効なYouTubeのURLまたは動画IDが見つかりませんでした。');
             }
+        }
+
+        // 互換性維持：もし古いコードの名残で changeVideo が呼ばれても動くように統合
+        function changeVideo() {
+            loadVideo();
         }
 
         function extractVideoId(url) {
             var regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
             var match = url.match(regExp);
             return (match && match[2].length == 11) ? match[2] : url;
+        }
+
+        // 履歴に動画IDを保存し、localStorageに書き込む関数
+        function saveToHistory(id) {
+            // すでに同じIDが履歴にある場合は、一旦削除して先頭（最新）に並び替える
+            var index = videoHistory.indexOf(id);
+            if (index !== -1) {
+                videoHistory.splice(index, 1);
+            }
+            
+            // 先頭に追加
+            videoHistory.unshift(id);
+            
+            // 最大件数（8件）を超えたら古いものを削除
+            if (videoHistory.length > MAX_HISTORY) {
+                videoHistory.pop();
+            }
+            
+            // ブラウザのストレージに永続保存
+            localStorage.setItem('yt_lesson_history', JSON.stringify(videoHistory));
+            
+            // 画面のドロップダウン表示を更新
+            updateHistorySelect();
+        }
+
+        // 履歴ドロップダウンの表示を更新する関数
+        function updateHistorySelect() {
+            var select = document.getElementById('videoHistorySelect');
+            if (!select) return;
+            
+            // 初期状態にリセット
+            select.innerHTML = '<option value="">-- HISTORY --</option>';
+            
+            // 履歴配列から選択肢（option）を生成
+            for (var i = 0; i < videoHistory.length; i++) {
+                var option = document.createElement('option');
+                option.value = videoHistory[i];
+                option.textContent = "ID: " + videoHistory[i];
+                select.appendChild(option);
+            }
+        }
+
+        // 履歴ドロップダウン（HISTORY）が選択された瞬間に自動ロードする関数
+        function loadVideoFromHistory() {
+            var select = document.getElementById('videoHistorySelect');
+            var selectedId = select.value;
+            
+            if (selectedId) {
+                // 入力窓に選択したIDをセットしてロードを実行
+                document.getElementById('videoIdInput').value = selectedId;
+                loadVideo();
+            }
         }
 
         // プレーヤーの状態が変更されたときに呼び出される関数
@@ -1282,6 +1349,22 @@
                     endPress('B'); // Bキーを離したら、短押し確定か長押し終了を判定
                     break;
             }
+        });
+        // ページ読み込み時に実行する初期化処理（過去の履歴を復活）
+        window.addEventListener('DOMContentLoaded', function() {
+            var storedHistory = localStorage.getItem('yt_lesson_history');
+            if (storedHistory) {
+                try {
+                    videoHistory = JSON.parse(storedHistory);
+                    if (!Array.isArray(videoHistory)) {
+                        videoHistory = [];
+                    }
+                } catch(e) {
+                    videoHistory = [];
+                }
+            }
+            // 画面の履歴セレクトボックスに反映
+            updateHistorySelect();
         });
     </script>
 </body>
