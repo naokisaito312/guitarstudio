@@ -662,26 +662,45 @@
             
             select.innerHTML = '<option value="">-- HISTORY --</option>';
             
-            // 履歴配列から選択肢を生成
             for (var i = 0; i < videoHistory.length; i++) {
                 var option = document.createElement('option');
-                option.value = videoHistory[i].id; // 内部的な値は動画ID
+                option.value = videoHistory[i].id;
                 
-                // ★ 表示名を「動画のタイトル」にする（長すぎる場合はカット）
                 var displayTitle = videoHistory[i].title;
-                if (displayTitle.length > 30) {
+                if (displayTitle.length > 25) {
                     displayTitle = displayTitle.substring(0, 25) + "...";
                 }
                 option.textContent = displayTitle;
                 
                 select.appendChild(option);
             }
+
+            // ★【追加】履歴が1件以上ある場合、メニューの最下部に全削除用のスイッチを仕込む
+            if (videoHistory.length > 0) {
+                var clearOption = document.createElement('option');
+                clearOption.value = "__CLEAR_ALL__";
+                clearOption.textContent = "❌ CLEAR ALL HISTORY";
+                clearOption.style.color = "#ff3333"; // ドロップダウンを開いた時に赤文字で目立たせる
+                select.appendChild(clearOption);
+            }
         }
 
-        // 履歴ドロップダウンが選択された瞬間に自動ロードする関数
         function loadVideoFromHistory() {
             var select = document.getElementById('videoHistorySelect');
             var selectedId = select.value;
+            
+            // ★【追加】全削除スイッチが選択された場合の消去処理
+            if (selectedId === "__CLEAR_ALL__") {
+                if (confirm('すべての視聴履歴を削除しますか？')) {
+                    videoHistory = []; // 配列を空にする
+                    localStorage.removeItem('yt_lesson_history'); // PCの保存データを消去
+                    updateHistorySelect(); // ドロップダウンを初期状態に戻す
+                    document.getElementById('videoIdInput').value = ''; // 入力欄もクリア
+                } else {
+                    select.value = ""; // キャンセルした場合は選択を一番上に戻す
+                }
+                return;
+            }
             
             if (selectedId) {
                 document.getElementById('videoIdInput').value = selectedId;
