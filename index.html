@@ -360,14 +360,15 @@
             </div>
         </div>
 
-        <div class="tap-panel">
-            <div class="tap-display" id="tapDisplay">TAP<br><span>---</span></div>
-            <button class="btn tap-btn" onclick="tapBPM()">TAP</button>
-            <div class="metro-led" id="metroLed"></div>
+<        div class="tap-panel">
+            <button class="btn metro-btn" id="metroBtn" onclick="toggleMetronome()">
+                METRO
+                <span class="metro-led" id="metroLed"></span>
+            </button>
             <input type="number" id="bpmInput" value="120" min="30" max="300" 
                    oninput="applyBpmFromInput()" 
                    onkeydown="handleBpmEnter(event)">
-            <button class="btn metro-btn" id="metroBtn" onclick="toggleMetronome()">METRO</button>
+            <button class="btn tap-btn" id="tapBtn" onmousedown="tapBPM()">TAP</button>
         </div>
     </div>
 
@@ -819,13 +820,18 @@
                 var avgInterval = intervals.reduce(function(a, b) { return a + b; }) / intervals.length;
                 
                 // ミリ秒からBPMに変換 (60000ms / 平均間隔)
-                var bpm = Math.round(60000 / avgInterval);
+                var calculatedBpm = Math.round(60000 / avgInterval);
 
-                // 画面表示を更新（ネオンレッド/ピンクでBPMを表示）
-                var bpmSpan = document.querySelector('#bpmDisplay span');
-                bpmSpan.textContent = bpm;
-                bpmSpan.style.color = '#ff3b30';
-                bpmSpan.style.textShadow = '0 0 8px rgba(255,59,48,0.6)';
+                if (calculatedBpm >= 30 && calculatedBpm <= 300) {
+                    bpm = calculatedBpm;
+                    // ★【共通化】入力欄の数値を直接書き換えます
+                    document.getElementById('bpmInput').value = bpm;
+                    
+                    // メトロノーム動作中なら即座にテンポを同期
+                    if (isMetroPlaying && audioCtx) {
+                        nextNoteTime = audioCtx.currentTime;
+                    }
+                }
             }
 
             // 視覚的なフィードバック：タップした瞬間にボタンを一瞬フラッシュさせる
@@ -836,6 +842,27 @@
             }, 50);
         }
 
+        // キーボードからBPM数値が直接入力された瞬間にリアルタイム反映する関数
+        function applyBpmFromInput() {
+            var val = parseInt(document.getElementById('bpmInput').value);
+            if (val >= 30 && val <= 300) {
+                bpm = val; // 内部のBPM変数を更新
+                
+                // メトロノームが動作中の場合、次の拍のタイミングを新しいBPMで即座に再計算する
+                if (isMetroPlaying && audioCtx) {
+                    nextNoteTime = audioCtx.currentTime; 
+                }
+            }
+        }
+
+        // Enterキーが押されたら入力欄のフォーカスを外して演奏に戻るための関数
+        function handleBpmEnter(event) {
+            if (event.key === 'Enter') {
+                event.preventDefault();
+                document.getElementById('bpmInput').blur(); // 入力欄の選択を解除
+            }
+        }
+        
         // --- メトロノームのロジック ---
         var audioCtx = null;
         var metroTimer = null;
@@ -861,14 +888,13 @@
             var btn = document.getElementById('metroBtn');
 
             if (isMetroPlaying) {
-                // BPMがまだ計測されていない場合はデフォルト120にする
-                var currentBPM = parseInt(document.querySelector('#bpmDisplay span').textContent);
-                if (isNaN(currentBPM)) {
+                // ★ 共通化した入力欄から現在のBPMを取得
+                var currentBPM = parseInt(document.getElementById('bpmInput').value);
+                if (isNaN(currentBPM) || currentBPM < 30 || currentBPM > 300) {
                     currentBPM = 120;
-                    var bpmSpan = document.querySelector('#bpmDisplay span');
-                    bpmSpan.textContent = currentBPM;
-                    bpmSpan.style.color = '#ff3b30';
+                    document.getElementById('bpmInput').value = 120;
                 }
+                bpm = currentBPM;
 
                 currentBeat = 0;
                 nextNoteTime = audioCtx.currentTime + 0.05;
