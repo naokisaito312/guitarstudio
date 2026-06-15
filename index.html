@@ -468,20 +468,6 @@
         <button class="btn btn-blue" onclick="skip(-10)">-10 sec</button>
         <button class="btn btn-blue" id="playPauseBtn" onclick="togglePlay()">Play / Pause</button>
         <button class="btn btn-blue" onclick="skip(10)">+10 sec</button>
-        
-        <button class="btn ab-btn" id="btnA" 
-                onmousedown="startPress('A')" 
-                onmouseup="endPress('A')" 
-                onmouseleave="cancelPress('A')"
-                ontouchstart="startPress('A')" 
-                ontouchend="endPress('A')">A<br><span class="btn-status" style="color: #666;">--:--</span></button>
-                
-        <button class="btn ab-btn" id="btnB" 
-                onmousedown="startPress('B')" 
-                onmouseup="endPress('B')" 
-                onmouseleave="cancelPress('B')"
-                ontouchstart="startPress('B')" 
-                ontouchend="endPress('B')">B<br><span class="btn-status" style="color: #666;">--:--</span></button>
 
         <div class="speed-panel">
             <div class="speed-display" id="speedDisplay">
@@ -496,6 +482,20 @@
                 <button class="btn speed-btn" style="height: 48px;" onclick="toggleSpeed()">SPEED</button>
             </div>
         </div>
+        
+        <button class="btn ab-btn" id="btnA" 
+                onmousedown="startPress('A')" 
+                onmouseup="endPress('A')" 
+                onmouseleave="cancelPress('A')"
+                ontouchstart="startPress('A')" 
+                ontouchend="endPress('A')">A<br><span class="btn-status" style="color: #666;">--:--</span></button>
+                
+        <button class="btn ab-btn" id="btnB" 
+                onmousedown="startPress('B')" 
+                onmouseup="endPress('B')" 
+                onmouseleave="cancelPress('B')"
+                ontouchstart="startPress('B')" 
+                ontouchend="endPress('B')">B<br><span class="btn-status" style="color: #666;">--:--</span></button>
 
         <div class="tap-panel">
             <button class="btn metro-btn" id="metroBtn" onclick="toggleMetronome()">
