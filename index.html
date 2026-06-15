@@ -263,7 +263,7 @@
             padding: 5px 15px;
             border-radius: 4px;
             font-size: 11px;
-            color: #888;
+            color: #d2ff4d;
             text-align: center;
             border: 1px solid #2d2d34;
             box-shadow: inset 0 2px 3px rgba(0,0,0,0.6);
@@ -337,41 +337,31 @@
         #bpmInput {
             width: 76px;
             height: 44px;
-            background-color: #0c0c0e;   /* 奥深く沈むダーク液晶ブラック */
-            border: 2px solid #2d2d34;     /* シャープなメタルフレーム */
+            background-color: #0c0c0e;
+            border: 2px solid #2d2d34;
             border-radius: 6px;
-            
-            /* 文字（デジタルネオン）の装飾 */
             font-family: 'Consolas', 'Courier New', monospace;
             font-size: 20px;
             font-weight: bold;
-            color: #ff3b30;              /* TAP時とシンクロする強烈なネオンレッド */
+            color: #ddbfff; /* METROボタンの #ddbfff と完全にシンクロ */
             text-align: center;
-            text-shadow: 0 0 8px rgba(255, 59, 48, 0.6); /* 液晶の文字が発光しているようなボカシ */
-            
-            /* ブラウザ特有の「上下の矢印ボタン(スピンボタン)」を非表示にしてスッキリさせる */
+            text-shadow: 0 0 10px rgba(153, 51, 255, 0.8); /* 紫色の発光エフェクト */
             -webkit-appearance: none;
             -moz-appearance: textfield;
             margin: 0;
-            
-            /* 内側に影を落として、画面が奥に凹んでいる立体感を演出 */
             box-shadow: inset 0 3px 6px rgba(0, 0, 0, 0.9), 0 1px 0px rgba(255, 255, 255, 0.05);
             outline: none;
             transition: all 0.2s ease;
             cursor: pointer;
         }
-
-        /* 入力欄にマウスが乗った時（少しだけフレームが明るくなる） */
         #bpmInput:hover {
             border-color: #444450;
             background-color: #0f0f12;
         }
-
-        /* 実際にキーボードで数値をタイピングしている（フォーカス時）の演出 */
         #bpmInput:focus {
-            border-color: #ff3b30;       /* 枠線もネオンレッドに同期 */
-            background-color: #140808;   /* 液晶のバックライトがほんのり赤く熱を帯びる */
-            box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.9), 0 0 10px rgba(255, 59, 48, 0.2);
+            border-color: #9933ff; /* フォーカス時の枠線も紫に */
+            background-color: #0f0814; /* 液晶の奥のバックライトがほんのり紫に灯る演出 */
+            box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.9), 0 0 10px rgba(153, 51, 255, 0.3);
             cursor: text;
         }
 
