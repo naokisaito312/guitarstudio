@@ -604,22 +604,9 @@
             var videoId = extractVideoId(input);
             
             if (videoId && player && typeof player.loadVideoById === 'function') {
+                currentVideoId = videoId; // 確実に現在のIDを追従させる
                 player.loadVideoById(videoId);
                 resetLoopSettings();
-                
-                // ★【ポイント】動画の読み込み直後はまだタイトルが取得できない場合があるため、
-                // 少しだけ（0.5秒）待ってからプレイヤーからタイトルを安全に抽出して保存します
-                setTimeout(function() {
-                    var videoTitle = id; // 予備のタイトル
-                    if (typeof player.getVideoData === 'function' && player.getVideoData()) {
-                        var data = player.getVideoData();
-                        if (data.title) {
-                            videoTitle = data.title;
-                        }
-                    }
-                    saveToHistory(videoId, videoTitle);
-                }, 500);
-                
             } else {
                 alert('有効なYouTubeのURLまたは動画IDが見つかりませんでした。');
             }
@@ -637,16 +624,24 @@
 
         // 履歴に動画IDとタイトルを保存する関数
         function saveToHistory(id, title) {
-            // すでに同じIDが履歴にある場合は、一旦削除して最新にする
+            if (!id) return;
+            // タイトルが空、またはIDと同じだった場合は、見栄えのために「Loading...」または仮タイトルにする
+            var finalTitle = (title && title !== id) ? title : "YouTube Video (" + id + ")";
+
+            // すでに同じIDが履歴にある場合は、一旦リストから削除（重複防止）
             for (var i = 0; i < videoHistory.length; i++) {
                 if (videoHistory[i].id === id) {
+                    // もし既存のタイトルがしっかり入っていて、新しいタイトルが仮タイトルの場合は上書きしない
+                    if (finalTitle.indexOf("YouTube Video") === 0 && videoHistory[i].title.indexOf("YouTube Video") !== 0) {
+                        finalTitle = videoHistory[i].title;
+                    }
                     videoHistory.splice(i, 1);
                     break;
                 }
             }
             
-            // 先頭に【IDとタイトルのオブジェクト】を追加
-            videoHistory.unshift({ id: id, title: title });
+            // 先頭に最新のオブジェクトを追加
+            videoHistory.unshift({ id: id, title: finalTitle });
             
             // 最大件数を超えたら古いものを削除
             if (videoHistory.length > MAX_HISTORY) {
@@ -656,7 +651,7 @@
             // ストレージに保存
             localStorage.setItem('yt_lesson_history', JSON.stringify(videoHistory));
             
-            // ドロップダウンを更新
+            // 画面のドロップダウンを即座に更新
             updateHistorySelect();
         }
 
@@ -700,8 +695,15 @@
             if (isCountingIn) return;
 
             if (event.data == YT.PlayerState.PLAYING) {
-                if (currentVideoId && player.getVideoData) {
-                    saveToHistory(currentVideoId, player.getVideoData().title || currentVideoId);
+                // ★ 再生が始まったら確実にプレイヤーから動画データを取得
+                if (player && typeof player.getVideoData === 'function') {
+                    var videoData = player.getVideoData();
+                    var targetId = videoData.video_id || currentVideoId;
+                    var targetTitle = videoData.title || targetId;
+                    
+                    if (targetId) {
+                        saveToHistory(targetId, targetTitle);
+                    }
                 }
                 // 再生が開始されたらループチェックをスタート（A点、B点が設定されていれば動く）
                 startLoopCheck();
