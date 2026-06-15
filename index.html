@@ -927,7 +927,8 @@
         }
 
         function advanceNote() {
-            var currentBPM = parseInt(document.querySelector('#bpmDisplay span').textContent) || 120;
+            // ★ 共通化した入力欄から現在のBPMを取得
+            var currentBPM = parseInt(document.getElementById('bpmInput').value) || 120;
             var secondsPerBeat = 60.0 / currentBPM;
             nextNoteTime += secondsPerBeat; // 次の拍の時間を計算
 
