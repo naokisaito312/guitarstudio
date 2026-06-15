@@ -451,13 +451,40 @@
         .metro-led.flash {
             transform: scale(1.1);
         }
+
+        /* 履歴セレクトボックスのカスタムデザイン */
+        #videoHistorySelect {
+            padding: 10px;
+            font-size: 13px;
+            font-family: 'Consolas', 'Courier New', monospace;
+            background-color: #0c0c0e;
+            color: #00ccff; /* 少し明るい青（TAPと同色系）で未来的な液晶感を演出 */
+            border: 1px solid #2d2d34;
+            border-radius: 4px;
+            cursor: pointer;
+            outline: none;
+            max-width: 150px;
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.8);
+            transition: border-color 0.2s;
+        }
+        #videoHistorySelect:hover {
+            border-color: #444450;
+        }
+        /* ドロップダウンを開いた時の中身の選択肢 */
+        #videoHistorySelect option {
+            background-color: #1a1a1e;
+            color: #fff;
+        }
     </style>
 </head>
 <body>
 
     <div class="input-container">
-        <input type="text" id="videoUrl" placeholder="YouTubeの動画URL または 動画ID を入力">
-        <button onclick="changeVideo()">LOAD</button>
+        <input type="text" id="videoIdInput" placeholder="YouTube Video ID or URL (e.g., dQw4w9WgXcQ)">
+        <select id="videoHistorySelect" onchange="loadVideoFromHistory()">
+            <option value="">-- HISTORY --</option>
+        </select>
+        <button class="btn" onclick="loadVideo()">LOAD</button>
     </div>
 
     <div class="video-container">
