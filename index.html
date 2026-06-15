@@ -361,12 +361,13 @@
         </div>
 
         <div class="tap-panel">
-            <button class="btn metro-btn" id="metroBtn" onclick="toggleMetronome()">
-                METRO
-                <span class="metro-led" id="metroLed"></span>
-            </button>
-            <div class="tap-display" id="bpmDisplay">BPM<br><span>---</span></div>
-            <button class="btn tap-btn" id="tapBtn" onmousedown="tapBPM()">TAP</button>
+            <div class="tap-display" id="tapDisplay">TAP<br><span>---</span></div>
+            <button class="btn tap-btn" onclick="tapBPM()">TAP</button>
+            <div class="metro-led" id="metroLed"></div>
+            <input type="number" id="bpmInput" value="120" min="30" max="300" 
+                   oninput="applyBpmFromInput()" 
+                   onkeydown="handleBpmEnter(event)">
+            <button class="btn metro-btn" id="metroBtn" onclick="toggleMetronome()">METRO</button>
         </div>
     </div>
 
@@ -764,7 +765,35 @@
                 }
             }
         }
+        
+        // キーボードからBPM数値が入力された瞬間にリアルタイム反映する関数
+        function applyBpmFromInput() {
+            var val = parseInt(document.getElementById('bpmInput').value);
+            if (val >= 30 && val <= 300) {
+                // メトロノームが読み込んでいるBPM表示窓の数値を書き換える
+                var bpmSpan = document.querySelector('#bpmDisplay span');
+                if (bpmSpan) {
+                    bpmSpan.textContent = val;
+                    bpmSpan.style.color = '#ff3b30'; // TAP時と同じネオンカラーに
+                    bpmSpan.style.textShadow = '0 0 8px rgba(255,59,48,0.6)';
+                }
+                
+                // メトロノームが動作中の場合、次の拍のタイミングを新しいBPMで即座に再計算する
+                if (isMetroPlaying && audioCtx) {
+                    // 次に鳴るクリック音の時間を現在の時間にリセットしてテンポ変化のラグをなくす
+                    nextNoteTime = audioCtx.currentTime; 
+                }
+            }
+        }
 
+        // Enterキーが押されたら入力欄のフォーカスを外してギター演奏に戻るための関数
+        function handleBpmEnter(event) {
+            if (event.key === 'Enter') {
+                event.preventDefault();
+                document.getElementById('bpmInput').blur(); // 入力欄のフォーカスを解除
+            }
+        }
+        
         // --- TAP BPM コントロールのロジック ---
         var tapTimes = [];
         var tapTimeoutTimer = null;
