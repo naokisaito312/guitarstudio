@@ -143,7 +143,73 @@
             transform: translateY(2px);
             box-shadow: 0 1px 2px rgba(0,0,0,0.5);
         }
-        
+
+        /* ==================================================
+           ★ 自作フットコントローラーと同期するカラー設定
+        ================================================== */
+
+        /* 1. 再生/一時停止、10秒戻し、10秒送り：少し濃い青色 */
+        .btn-blue {
+            border-color: #0055ff !important;
+            color: #88b0ff !important;
+        }
+        .btn-blue:hover:active {
+            background: #002266 !important;
+            border-color: #3377ff !important;
+            box-shadow: 0 0 15px rgba(0, 85, 255, 0.6), inset 0 2px 5px rgba(0,0,0,0.8) !important;
+        }
+
+        /* 2. 再生速度変更：黄色に近い黄緑 */
+        .speed-btn {
+            border-color: #99cc00 !important;
+            color: #d2ff4d !important;
+        }
+        .speed-btn:hover:active {
+            background: #334400 !important;
+            border-color: #bbff00 !important;
+            box-shadow: 0 0 15px rgba(153, 204, 0, 0.6), inset 0 2px 5px rgba(0,0,0,0.8) !important;
+        }
+
+        /* 3. A, Bボタン：赤（長押し時などの発光も赤に同期） */
+        .footswitch {
+            border-color: #ff3333 !important;
+            color: #ff8888 !important;
+        }
+        .footswitch:hover:active {
+            background: #550000 !important;
+            border-color: #ff5555 !important;
+            box-shadow: 0 0 15px rgba(255, 51, 51, 0.6), inset 0 2px 5px rgba(0,0,0,0.8) !important;
+        }
+        /* A/Bアクティブ時（緑だったものを赤発光に変更） */
+        .footswitch.active {
+            background: #220000 !important;
+            border-color: #ff1a1a !important;
+            color: #fff !important;
+            box-shadow: 0 0 20px rgba(255, 26, 26, 0.6), inset 0 1px 0 rgba(255,255,255,0.2) !important;
+            text-shadow: 0 0 8px rgba(255, 26, 26, 0.8) !important;
+        }
+
+        /* 4. TAPボタン：少し明るい青 */
+        .btn.tap-btn {
+            border-color: #00ccff !important;
+            color: #99eeff !important;
+        }
+        .btn.tap-btn:hover:active {
+            background: #004455 !important;
+            border-color: #33ddff !important;
+            box-shadow: 0 0 15px rgba(0, 204, 255, 0.6), inset 0 2px 5px rgba(0,0,0,0.8) !important;
+        }
+
+        /* 5. METRO：紫 */
+        .btn.metro-btn {
+            border-color: #9933ff !important;
+            color: #ddbfff !important;
+        }
+        .btn.metro-btn:hover:active {
+            background: #330066 !important;
+            border-color: #b366ff !important;
+            box-shadow: 0 0 15px rgba(153, 51, 255, 0.6), inset 0 2px 5px rgba(0,0,0,0.8) !important;
+        }
         /* Aボタン、Bボタンの追加スタイル */
         .ab-btn {
             position: relative;
