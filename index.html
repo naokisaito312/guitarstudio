@@ -145,7 +145,7 @@
         }
 
         /* ==================================================
-           ★ 自作フットコントローラーと同期するカラー設定
+           ★ 自作フットコントローラーと完全に同期するカラー設定
         ================================================== */
 
         /* 1. 再生/一時停止、10秒戻し、10秒送り：少し濃い青色 */
@@ -153,40 +153,53 @@
             border-color: #0055ff !important;
             color: #88b0ff !important;
         }
-        .btn-blue:hover:active {
-            background: #002266 !important;
+        /* マウスホバー時、およびフットペダルを踏み込んだ（アクティブ）際の発光 */
+        .btn-blue:hover, .btn-blue:active {
             border-color: #3377ff !important;
+            color: #b3ccff !important;
+        }
+        .btn-blue:active {
+            background: #002266 !important;
             box-shadow: 0 0 15px rgba(0, 85, 255, 0.6), inset 0 2px 5px rgba(0,0,0,0.8) !important;
         }
 
         /* 2. 再生速度変更：黄色に近い黄緑 */
-        .speed-btn {
+        .btn.speed-btn {
             border-color: #99cc00 !important;
             color: #d2ff4d !important;
         }
-        .speed-btn:hover:active {
-            background: #334400 !important;
+        .btn.speed-btn:hover, .btn.speed-btn:active {
             border-color: #bbff00 !important;
+            color: #e6ff99 !important;
+        }
+        .btn.speed-btn:active {
+            background: #223300 !important;
             box-shadow: 0 0 15px rgba(153, 204, 0, 0.6), inset 0 2px 5px rgba(0,0,0,0.8) !important;
         }
 
-        /* 3. A, Bボタン：赤（長押し時などの発光も赤に同期） */
-        .footswitch {
+        /* 3. A, Bボタン：赤（長押しクリア時や、フットペダルを踏んだ瞬間の色） */
+        .btn.ab-btn {
             border-color: #ff3333 !important;
             color: #ff8888 !important;
         }
-        .footswitch:hover:active {
-            background: #550000 !important;
+        .btn.ab-btn:hover, .btn.ab-btn:active {
             border-color: #ff5555 !important;
+            color: #ffb3b3 !important;
+        }
+        .btn.ab-btn:active {
+            background: #550000 !important;
             box-shadow: 0 0 15px rgba(255, 51, 51, 0.6), inset 0 2px 5px rgba(0,0,0,0.8) !important;
         }
-        /* A/Bアクティブ時（緑だったものを赤発光に変更） */
-        .footswitch.active {
-            background: #220000 !important;
-            border-color: #ff1a1a !important;
+        /* ★【重要】A/B点記憶時（トグルON状態）も赤色で常時ネオン発光させる設定 */
+        .btn.ab-btn.active {
+            background: linear-gradient(180deg, #440000 0%, #220000 100%) !important;
             color: #fff !important;
-            box-shadow: 0 0 20px rgba(255, 26, 26, 0.6), inset 0 1px 0 rgba(255,255,255,0.2) !important;
-            text-shadow: 0 0 8px rgba(255, 26, 26, 0.8) !important;
+            border-color: #ff1a1a !important;
+            box-shadow: 0 0 20px rgba(255, 26, 26, 0.7), inset 0 1px 0 rgba(255,255,255,0.2) !important;
+        }
+        .btn.ab-btn.active:hover {
+            background: linear-gradient(180deg, #660000 0%, #330000 100%) !important;
+            border-color: #ff4d4d !important;
         }
 
         /* 4. TAPボタン：少し明るい青 */
@@ -194,9 +207,12 @@
             border-color: #00ccff !important;
             color: #99eeff !important;
         }
-        .btn.tap-btn:hover:active {
-            background: #004455 !important;
+        .btn.tap-btn:hover, .btn.tap-btn:active {
             border-color: #33ddff !important;
+            color: #ccf5ff !important;
+        }
+        .btn.tap-btn:active {
+            background: #004455 !important;
             box-shadow: 0 0 15px rgba(0, 204, 255, 0.6), inset 0 2px 5px rgba(0,0,0,0.8) !important;
         }
 
@@ -205,9 +221,14 @@
             border-color: #9933ff !important;
             color: #ddbfff !important;
         }
-        .btn.metro-btn:hover:active {
-            background: #330066 !important;
+        .btn.metro-btn:hover, .btn.metro-btn:active {
             border-color: #b366ff !important;
+            color: #eedfff !important;
+        }
+        /* メトロノーム動作中（枠線が赤くなっていた箇所を自作ペダルの『紫』に同期） */
+        .btn.metro-btn:active, .btn.metro-btn[style*="border-color"] {
+            background: #220044 !important;
+            border-color: #9933ff !important;
             box-shadow: 0 0 15px rgba(153, 51, 255, 0.6), inset 0 2px 5px rgba(0,0,0,0.8) !important;
         }
         /* Aボタン、Bボタンの追加スタイル */
@@ -444,9 +465,9 @@
     </div>
 
     <div class="controls">
-        <button class="btn" onclick="skip(-10)">-10 sec</button>
-        <button class="btn" id="playPauseBtn" onclick="togglePlay()">Play / Pause</button>
-        <button class="btn" onclick="skip(10)">+10 sec</button>
+        <button class="btn btn-blue" onclick="skip(-10)">-10 sec</button>
+        <button class="btn btn-blue" id="playPauseBtn" onclick="togglePlay()">Play / Pause</button>
+        <button class="btn btn-blue" onclick="skip(10)">+10 sec</button>
         
         <button class="btn ab-btn" id="btnA" 
                 onmousedown="startPress('A')" 
@@ -1017,7 +1038,7 @@
                 scheduler(); // スケジューラ開始
                 
                 led.classList.add('on');
-                btn.style.borderColor = '#ff3b30';
+                btn.style.borderColor = '#9933ff';
             } else {
                 if (metroTimer) clearTimeout(metroTimer);
                 
