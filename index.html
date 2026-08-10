@@ -139,12 +139,12 @@
             bottom: 0;
             left: 0;
             width: 100%;
-            height: 14px; /* クリックしやすい判定幅 */
+            height: 24px; /* ホバー・ツールチップ表示エリア拡張 */
             z-index: 10;
             display: flex;
             align-items: flex-end;
             cursor: pointer;
-            background: linear-gradient(to top, rgba(0,0,0,0.3), transparent);
+            background: linear-gradient(to top, rgba(0,0,0,0.35), transparent);
         }
 
         .minimal-progressbar-bg {
@@ -173,7 +173,7 @@
             position: absolute;
             right: -5px;
             top: 50%;
-            transform: translateY(-50%) scale(0);
+            transform: translateY(-50%) scale(0.8);
             width: 10px;
             height: 10px;
             background-color: #ef4444;
@@ -182,7 +182,26 @@
         }
 
         .minimal-progressbar-container:hover .minimal-progressbar-fill::after {
-            transform: translateY(-50%) scale(1);
+            transform: translateY(-50%) scale(1.2);
+        }
+
+        /* ★再生時間表示ツールチップ (MM:SS) */
+        .mini-time-tooltip {
+            position: absolute;
+            right: 0;
+            top: -28px;
+            transform: translateX(50%);
+            background-color: rgba(15, 23, 42, 0.85);
+            color: #ffffff;
+            font-size: 11px;
+            font-weight: 700;
+            font-family: monospace, sans-serif;
+            padding: 2px 6px;
+            border-radius: 4px;
+            pointer-events: none;
+            white-space: nowrap;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+            border: 1px solid rgba(255,255,255,0.15);
         }
 
         /* Webカメラプレビュー領域 */
@@ -476,7 +495,9 @@
                 <!-- 自前ミニマル再生バー -->
                 <div class="minimal-progressbar-container" id="miniProgressContainer">
                     <div class="minimal-progressbar-bg">
-                        <div class="minimal-progressbar-fill" id="miniProgressFill"></div>
+                        <div class="minimal-progressbar-fill" id="miniProgressFill">
+                            <span class="mini-time-tooltip" id="miniTimeTooltip">00:00</span>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -747,6 +768,13 @@
             }
         }
 
+        /* 時間フォーマットヘルパー (MM:SS) */
+        function formatMMSS(seconds) {
+            var m = Math.floor(seconds / 60);
+            var s = Math.floor(seconds % 60);
+            return (m < 10 ? "0" : "") + m + ":" + (s < 10 ? "0" : "") + s;
+        }
+
         /* ★ミニマル再生バーの同期＆シーク処理 */
         var isMiniProgressBarSeeking = false;
 
@@ -759,7 +787,10 @@
             if (duration > 0) {
                 var percentage = (currentTime / duration) * 100;
                 var fillElem = document.getElementById('miniProgressFill');
+                var tooltipElem = document.getElementById('miniTimeTooltip');
+
                 if (fillElem) fillElem.style.width = percentage + '%';
+                if (tooltipElem) tooltipElem.textContent = formatMMSS(currentTime);
             }
         }, 250);
 
@@ -775,9 +806,15 @@
             if (width > 0) {
                 var ratio = Math.max(0, Math.min(1, clickX / width));
                 var duration = player.getDuration();
+                var targetTime = ratio * duration;
+
                 var fillElem = document.getElementById('miniProgressFill');
+                var tooltipElem = document.getElementById('miniTimeTooltip');
+
                 if (fillElem) fillElem.style.width = (ratio * 100) + '%';
-                player.seekTo(ratio * duration, true);
+                if (tooltipElem) tooltipElem.textContent = formatMMSS(targetTime);
+
+                player.seekTo(targetTime, true);
             }
         }
 
