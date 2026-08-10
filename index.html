@@ -10,10 +10,10 @@
             padding: 0;
             width: 100%;
             height: 100vh;
-            overflow: hidden; /* スクロールなし */
-            background-color: #121214;
-            color: #e0e0e0;
-            font-family: 'Consolas', 'Courier New', monospace;
+            overflow: hidden;
+            background-color: #f4f5f8;
+            color: #2d3748;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
         }
 
         body {
@@ -30,43 +30,47 @@
             width: 100%;
             display: flex;
             gap: 12px;
-            background: #1a1a1e;
-            padding: 8px 12px;
-            border-radius: 8px;
-            border: 1px solid #2d2d34;
-            box-shadow: inset 0 2px 5px rgba(0,0,0,0.5);
+            background: #ffffff;
+            padding: 10px 16px;
+            border-radius: 16px;
+            border: 1px solid #e2e8f0;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.03);
             box-sizing: border-box;
             flex-shrink: 0;
         }
         .input-container input {
             flex: 1;
-            padding: 10px 14px;
-            font-size: 15px;
-            background-color: #0d0d0f;
-            border: 1px solid #3a3a45;
-            border-radius: 6px;
-            color: #00ffcc;
+            padding: 10px 16px;
+            font-size: 14px;
+            background-color: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 10px;
+            color: #1a202c;
             font-family: inherit;
+            transition: all 0.2s ease;
         }
         .input-container input:focus {
             outline: none;
-            border-color: #00ffcc;
-            box-shadow: 0 0 8px rgba(0,255,204,0.3);
+            border-color: #6366f1;
+            background-color: #ffffff;
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15);
         }
         .input-container button {
             padding: 10px 24px;
-            font-size: 15px;
-            background-color: #B40000;
-            color: #fff;
+            font-size: 14px;
+            background-color: #6366f1;
+            color: #ffffff;
             border: none;
-            border-radius: 6px;
+            border-radius: 10px;
             cursor: pointer;
-            font-weight: bold;
-            text-transform: uppercase;
-            transition: background 0.2s;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            transition: all 0.2s ease;
+            box-shadow: 0 2px 8px rgba(99, 102, 241, 0.25);
         }
         .input-container button:hover {
-            background-color: #FF0000;
+            background-color: #4f46e5;
+            transform: translateY(-1px);
         }
         
         /* プレイヤー＆Webカメラ メイン領域 */
@@ -93,7 +97,7 @@
         }
 
         .stage-column.camera-column {
-            width: 840px; /* 前回の840px指定を維持 */
+            width: 840px;
             max-width: 45vw;
             flex-shrink: 0;
         }
@@ -103,11 +107,10 @@
             width: 100%;
             flex: 1;
             position: relative;
-            background-color: #000;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.7), 0 0 1px #00ffcc;
-            border-radius: 10px;
+            background-color: #0f172a;
+            border-radius: 20px;
             overflow: hidden;
-            border: 3px solid #2d2d34;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.08);
             box-sizing: border-box;
             display: flex;
             justify-content: center;
@@ -115,11 +118,10 @@
         }
 
         .no-video-message {
-            color: #555;
-            font-size: 18px;
-            font-weight: bold;
-            letter-spacing: 2px;
-            text-shadow: 0 0 5px rgba(0,0,0,0.8);
+            color: #94a3b8;
+            font-size: 16px;
+            font-weight: 600;
+            letter-spacing: 1px;
             text-align: center;
         }
         
@@ -136,12 +138,11 @@
         .camera-container {
             width: 100%;
             flex: 1;
-            background-color: #050507;
-            border: 3px solid #2d2d34;
-            border-radius: 10px;
+            background-color: #e2e8f0;
+            border-radius: 20px;
             overflow: hidden;
             position: relative;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.7), 0 0 1px #00ffcc;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05);
             display: flex;
             justify-content: center;
             align-items: center;
@@ -157,20 +158,20 @@
         }
 
         .camera-overlay {
-            color: #666;
+            color: #64748b;
             font-size: 15px;
+            font-weight: 600;
             text-align: center;
             padding: 10px;
             user-select: none;
-            transition: color 0.2s;
         }
 
-        /* ★コントロールパネル（グレー背景を撤去し、センター合わせで並べる） */
+        /* コントロールパネル */
         .controls {
             width: 100%;
             padding: 4px 0;
             display: flex;
-            gap: 16px;
+            gap: 12px;
             justify-content: center;
             align-items: center;
             flex-wrap: wrap;
@@ -178,157 +179,145 @@
             flex-shrink: 0;
         }
         
-        /* 共通ボタン（フットスイッチ風） */
+        /* 共通ボタン（洗練されたフラット/ソフトシャドウ風） */
         .btn {
-            width: 140px;
-            height: 60px;
+            width: 130px;
+            height: 56px;
             padding: 0;
-            font-size: 14px;
-            color: #bbb;
-            letter-spacing: 1px;
-            font-weight: bold;
+            font-size: 13px;
+            color: #475569;
+            font-weight: 600;
             font-family: inherit;
-            background: linear-gradient(180deg, #3a3a45 0%, #25252c 100%);
-            border: 1px solid #4a4a57;
-            border-radius: 6px;
+            background: #ffffff;
+            border: 1px solid #e2e8f0;
+            border-radius: 14px;
             cursor: pointer;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.05);
-            transition: all 0.1s ease;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
             user-select: none;
-            text-transform: uppercase;
             display: inline-flex;
             flex-direction: column;
             justify-content: center;
             align-items: center;
             text-align: center;
-            line-height: 1.4;
+            line-height: 1.3;
             outline: none;
         }
         .btn:focus { outline: none; }
         .btn:hover {
-            color: #ddd;
-            background: linear-gradient(180deg, #454552 0%, #2d2d36 100%);
+            color: #1e293b;
+            border-color: #cbd5e1;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
         }
         .btn-status {
             font-size: 12px;
             margin-top: 2px;
-            font-family: 'Consolas', 'Courier New', monospace;
+            font-family: inherit;
         }
         .btn:active {
-            transform: translateY(2px);
-            box-shadow: 0 1px 2px rgba(0,0,0,0.5);
+            transform: translateY(0);
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
         }
 
-        /* カラー設定 */
+        /* カラー・テーマ設定 */
         .btn-blue {
-            border-color: #0055ff !important;
-            color: #88b0ff !important;
+            background-color: #ffffff;
+            border-color: #e2e8f0;
+            color: #3b82f6;
         }
-        .btn-blue:hover, .btn-blue:active {
-            border-color: #3377ff !important;
-            color: #b3ccff !important;
-        }
-        .btn-blue:active {
-            background: #002266 !important;
-            box-shadow: 0 0 15px rgba(0, 85, 255, 0.6), inset 0 2px 5px rgba(0,0,0,0.8) !important;
+        .btn-blue:hover {
+            background-color: #eff6ff;
+            border-color: #bfdbfe;
+            color: #2563eb;
         }
 
         .btn.speed-btn {
-            border-color: #99cc00 !important;
-            color: #d2ff4d !important;
+            background-color: #ffffff;
+            border-color: #e2e8f0;
+            color: #10b981;
         }
-        .btn.speed-btn:hover, .btn.speed-btn:active {
-            border-color: #bbff00 !important;
-            color: #e6ff99 !important;
-        }
-        .btn.speed-btn:active {
-            background: #223300 !important;
-            box-shadow: 0 0 15px rgba(153, 204, 0, 0.6), inset 0 2px 5px rgba(0,0,0,0.8) !important;
+        .btn.speed-btn:hover {
+            background-color: #ecfdf5;
+            border-color: #a7f3d0;
+            color: #059669;
         }
 
         .btn.ab-btn {
-            border-color: #ff3333 !important;
-            color: #ff8888 !important;
+            background-color: #ffffff;
+            border-color: #e2e8f0;
+            color: #f43f5e;
         }
-        .btn.ab-btn:hover, .btn.ab-btn:active {
-            border-color: #ff5555 !important;
-            color: #ffb3b3 !important;
-        }
-        .btn.ab-btn:active {
-            background: #550000 !important;
-            box-shadow: 0 0 15px rgba(255, 51, 51, 0.6), inset 0 2px 5px rgba(0,0,0,0.8) !important;
+        .btn.ab-btn:hover {
+            background-color: #fff1f2;
+            border-color: #fecdd3;
+            color: #e11d48;
         }
         .btn.ab-btn.active {
-            background: linear-gradient(180deg, #440000 0%, #220000 100%) !important;
-            color: #fff !important;
-            border-color: #ff1a1a !important;
-            box-shadow: 0 0 20px rgba(255, 26, 26, 0.7), inset 0 1px 0 rgba(255,255,255,0.2) !important;
-        }
-        .btn.ab-btn.active:hover {
-            background: linear-gradient(180deg, #660000 0%, #330000 100%) !important;
-            border-color: #ff4d4d !important;
+            background: #f43f5e !important;
+            color: #ffffff !important;
+            border-color: #f43f5e !important;
+            box-shadow: 0 4px 14px rgba(244, 63, 94, 0.3) !important;
         }
 
         .btn.tap-btn {
-            border-color: #00ccff !important;
-            color: #99eeff !important;
+            background-color: #ffffff;
+            border-color: #e2e8f0;
+            color: #06b6d4;
         }
-        .btn.tap-btn:hover, .btn.tap-btn:active {
-            border-color: #33ddff !important;
-            color: #ccf5ff !important;
-        }
-        .btn.tap-btn:active {
-            background: #004455 !important;
-            box-shadow: 0 0 15px rgba(0, 204, 255, 0.6), inset 0 2px 5px rgba(0,0,0,0.8) !important;
+        .btn.tap-btn:hover {
+            background-color: #ecfeff;
+            border-color: #a5f3fc;
+            color: #0891b2;
         }
 
         .btn.metro-btn {
-            border-color: #9933ff !important;
-            color: #ddbfff !important;
+            background-color: #ffffff;
+            border-color: #e2e8f0;
+            color: #8b5cf6;
         }
-        .btn.metro-btn:hover, .btn.metro-btn:active {
-            border-color: #b366ff !important;
-            color: #eedfff !important;
-        }
-        .btn.metro-btn:active, .btn.metro-btn[style*="border-color"] {
-            background: #220044 !important;
-            border-color: #9933ff !important;
-            box-shadow: 0 0 15px rgba(153, 51, 255, 0.6), inset 0 2px 5px rgba(0,0,0,0.8) !important;
+        .btn.metro-btn:hover {
+            background-color: #f5f3ff;
+            border-color: #ddd6fe;
+            color: #7c3aed;
         }
 
-        /* ★カメラON/OFFトグル専用ボタン */
+        /* カメラトグルボタン */
         .btn.camera-btn {
-            border-color: #444 !important;
-            color: #888 !important;
+            background-color: #ffffff;
+            border-color: #e2e8f0;
+            color: #64748b;
         }
         .btn.camera-btn.active {
-            border-color: #00ffcc !important;
-            color: #00ffcc !important;
-            background: linear-gradient(180deg, #00332c 0%, #001a16 100%) !important;
-            box-shadow: 0 0 15px rgba(0, 255, 204, 0.4) !important;
+            background: #10b981 !important;
+            color: #ffffff !important;
+            border-color: #10b981 !important;
+            box-shadow: 0 4px 14px rgba(16, 185, 129, 0.3) !important;
         }
 
         .ab-btn { position: relative; }
 
-        .speed-panel {
+        /* スピード・タップ・パネル群 */
+        .speed-panel, .tap-panel {
             display: flex;
             align-items: center;
-            background: rgba(0, 0, 0, 0.2);
-            padding: 5px 10px;
-            border-radius: 8px;
-            border: 1px dashed #3a3a45;
-            gap: 10px;
+            background: #ffffff;
+            padding: 4px 8px;
+            border-radius: 16px;
+            border: 1px solid #e2e8f0;
+            gap: 8px;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.03);
         }
 
         .speed-display {
-            background: #1a1a1e;
-            padding: 5px 15px;
-            border-radius: 4px;
-            font-size: 11px;
-            color: #888;
+            background: #f8fafc;
+            padding: 4px 12px;
+            border-radius: 10px;
+            font-size: 10px;
+            font-weight: 700;
+            color: #94a3b8;
             text-align: center;
-            border: 1px solid #2d2d34;
-            box-shadow: inset 0 2px 3px rgba(0,0,0,0.6);
+            border: 1px solid #f1f5f9;
             height: 38px;
             overflow: hidden;
             position: relative;
@@ -345,74 +334,52 @@
         }
         
         .speed-reel-item {
-            font-size: 18px;
-            color: #d2ff4d;
-            font-weight: bold;
+            font-size: 16px;
+            color: #10b981;
+            font-weight: 700;
             height: 24px;
             line-height: 24px;
-            text-shadow: 0 0 10px rgba(153, 204, 0, 0.8);
             opacity: 0;
-            transition: opacity 0.2s ease, text-shadow 0.2s ease;
+            transition: opacity 0.2s ease;
         }
         
         .speed-reel-item.active { opacity: 1; }
-        
-        .speed-reel-item.default-speed.active {
-            color: #d2ff4d;
-            text-shadow: 0 0 10px rgba(153, 204, 0, 0.8);
-        }
 
         .speed-buttons {
             display: flex;
             flex-direction: column;
-            gap: 6px;
         }
         .btn.speed-btn {
-            width: 90px;
-            height: 27px;
+            width: 80px;
+            height: 44px;
             font-size: 12px;
-            border-radius: 3px;
-        }
-
-        .tap-panel {
-            display: flex;
-            align-items: center;
-            background: rgba(0, 0, 0, 0.2);
-            padding: 5px 10px;
-            border-radius: 8px;
-            border: 1px dashed #3a3a45;
-            gap: 10px;
+            border-radius: 10px;
         }
 
         #bpmInput {
-            width: 76px;
+            width: 70px;
             height: 44px;
-            background-color: #0c0c0e;
-            border: 2px solid #2d2d34;
-            border-radius: 6px;
-            font-family: 'Consolas', 'Courier New', monospace;
-            font-size: 20px;
-            font-weight: bold;
-            color: #ddbfff;
+            background-color: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 10px;
+            font-family: inherit;
+            font-size: 18px;
+            font-weight: 700;
+            color: #7c3aed;
             text-align: center;
-            text-shadow: 0 0 10px rgba(153, 51, 255, 0.8);
-            -webkit-appearance: none;
-            -moz-appearance: textfield;
             margin: 0;
-            box-shadow: inset 0 3px 6px rgba(0, 0, 0, 0.9), 0 1px 0px rgba(255, 255, 255, 0.05);
             outline: none;
             transition: all 0.2s ease;
             cursor: pointer;
         }
         #bpmInput:hover {
-            border-color: #444450;
-            background-color: #0f0f12;
+            border-color: #cbd5e1;
+            background-color: #ffffff;
         }
         #bpmInput:focus {
-            border-color: #9933ff;
-            background-color: #0f0814;
-            box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.9), 0 0 10px rgba(153, 51, 255, 0.3);
-            cursor: text;
+            border-color: #8b5cf6;
+            background-color: #ffffff;
+            box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.15);
         }
 
         #bpmInput::-webkit-outer-spin-button,
@@ -420,47 +387,19 @@
             -webkit-appearance: none;
             margin: 0;
         }
-        
-        .tap-display {
-            width: 70px;
-            height: 48px;
-            background-color: #0d0d0f;
-            border: 2px solid #2d2d34;
-            border-radius: 4px;
-            font-size: 10px;
-            color: #666;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            font-weight: bold;
-            box-shadow: inset 0 2px 5px rgba(0,0,0,0.8);
-        }
-        .tap-display span {
-            font-size: 16px;
-            color: #444;
-            margin-top: 2px;
-            transition: color 0.1s;
-        }
 
         .btn.tap-btn {
-            width: 70px;
-            height: 48px;
+            width: 64px;
+            height: 44px;
             font-size: 11px;
-            border-radius: 6px;
-            border-color: #555;
-            color: #ccc;
-        }
-        .btn.tap-btn:hover {
-            background: linear-gradient(180deg, #4a4a57 0%, #2f2f38 100%);
-            color: #fff;
+            border-radius: 10px;
         }
 
         .btn.metro-btn {
-            width: 80px;
-            height: 48px;
-            font-size: 10px;
-            border-radius: 6px;
+            width: 76px;
+            height: 44px;
+            font-size: 11px;
+            border-radius: 10px;
             display: flex;
             flex-direction: column;
             justify-content: center;
@@ -469,42 +408,40 @@
         }
         
         .metro-led {
-            width: 8px;
-            height: 8px;
-            background-color: #333;
+            width: 6px;
+            height: 6px;
+            background-color: #cbd5e1;
             border-radius: 50%;
             transition: all 0.2s;
-            box-shadow: inset 0 1px 2px rgba(0,0,0,0.5);
         }
         
-        .metro-led.on { background-color: #990000; }
-        .metro-led.flash { transform: scale(1.1); }
+        .metro-led.on { background-color: #8b5cf6; }
+        .metro-led.flash { transform: scale(1.4); }
 
         #videoHistorySelect {
-            padding: 10px;
+            padding: 8px 12px;
             font-size: 13px;
-            font-family: 'Consolas', 'Courier New', monospace;
-            background-color: #0c0c0e;
-            color: #00ccff;
-            border: 1px solid #2d2d34;
-            border-radius: 4px;
+            font-family: inherit;
+            background-color: #f8fafc;
+            color: #475569;
+            border: 1px solid #e2e8f0;
+            border-radius: 10px;
             cursor: pointer;
             outline: none;
-            max-width: 300px;
-            box-shadow: inset 0 2px 4px rgba(0,0,0,0.8);
+            max-width: 260px;
             transition: border-color 0.2s;
         }
-        #videoHistorySelect:hover { border-color: #444450; }
+        #videoHistorySelect:hover { border-color: #cbd5e1; }
         #videoHistorySelect option {
-            background-color: #1a1a1e;
-            color: #fff;
+            background-color: #ffffff;
+            color: #1e293b;
         }
     </style>
 </head>
 <body>
 
     <div class="input-container">
-        <input type="text" id="videoIdInput" placeholder="YouTube Video ID or URL">
+        <input type="text" id="videoIdInput" placeholder="YouTube Video ID または URL を入力">
         <select id="videoHistorySelect" onchange="loadVideoFromHistory()">
             <option value="">-- HISTORY --</option>
         </select>
@@ -521,7 +458,7 @@
                 <div id="noVideoMsg" class="no-video-message">NO VIDEO LOADED</div>
             </div>
             
-            <!-- 動画側コントロール（グレー下地なし、センター合わせ） -->
+            <!-- 動画側コントロール -->
             <div class="controls">
                 <button class="btn btn-blue" onclick="skip(-10)">-10 sec</button>
                 <button class="btn btn-blue" id="playPauseBtn" onclick="togglePlay()">Play / Pause</button>
@@ -537,7 +474,7 @@
                         </div>
                     </div>
                     <div class="speed-buttons">
-                        <button class="btn speed-btn" style="height: 48px;" onclick="toggleSpeed()">SPEED</button>
+                        <button class="btn speed-btn" onclick="toggleSpeed()">SPEED</button>
                     </div>
                 </div>
                 
@@ -546,14 +483,14 @@
                         onmouseup="endPress('A')" 
                         onmouseleave="cancelPress('A')"
                         ontouchstart="startPress('A')" 
-                        ontouchend="endPress('A')">A<br><span class="btn-status" style="color: #666;">--:--</span></button>
+                        ontouchend="endPress('A')">A<br><span class="btn-status" style="color: #94a3b8;">--:--</span></button>
                         
                 <button class="btn ab-btn" id="btnB" 
                         onmousedown="startPress('B')" 
                         onmouseup="endPress('B')" 
                         onmouseleave="cancelPress('B')"
                         ontouchstart="startPress('B')" 
-                        ontouchend="endPress('B')">B<br><span class="btn-status" style="color: #666;">--:--</span></button>
+                        ontouchend="endPress('B')">B<br><span class="btn-status" style="color: #94a3b8;">--:--</span></button>
 
                 <div class="tap-panel">
                     <button class="btn metro-btn" id="metroBtn" onclick="toggleMetronome()">
@@ -575,10 +512,10 @@
                 <div class="camera-overlay" id="cameraOverlay">📷 CAMERA OFF</div>
             </div>
             
-            <!-- カメラ側コントロール（センター合わせ） -->
+            <!-- カメラ側コントロール -->
             <div class="controls">
                 <button class="btn camera-btn" id="cameraToggleBtn" onclick="toggleCamera()">
-                    CAMERA<br><span class="btn-status" id="cameraStatusText" style="color: #666;">OFF</span>
+                    CAMERA<br><span class="btn-status" id="cameraStatusText" style="color: #94a3b8;">OFF</span>
                 </button>
             </div>
         </div>
@@ -594,19 +531,16 @@
         var player;
         var currentVideoId = null;
 
-        // ループ制御用の変数
         var pointA = null;
         var pointB = null;
         var loopTimer = null;
 
         var isCountingIn = false;
         
-        // 長押し判定用の変数
         var pressTimer = null;
         var isLongPress = false;
         var longPressDuration = 500;
 
-        // カメラ制御用の変数
         var cameraStream = null;
 
         function onYouTubeIframeAPIReady() {
@@ -622,7 +556,6 @@
             });
         }
 
-        // Webカメラ起動 / 停止のトグル切り替え処理
         async function toggleCamera() {
             var videoElem = document.getElementById('webcam');
             var overlayElem = document.getElementById('cameraOverlay');
@@ -630,16 +563,14 @@
             var statusElem = document.getElementById('cameraStatusText');
 
             if (cameraStream) {
-                // カメラをオフにする処理
                 cameraStream.getTracks().forEach(function(track) { track.stop(); });
                 cameraStream = null;
                 videoElem.style.display = 'none';
                 overlayElem.style.display = 'block';
                 btnElem.classList.remove('active');
                 statusElem.textContent = 'OFF';
-                statusElem.style.color = '#666';
+                statusElem.style.color = '#94a3b8';
             } else {
-                // カメラをオンにする処理
                 try {
                     cameraStream = await navigator.mediaDevices.getUserMedia({ 
                         video: { width: { ideal: 720 }, height: { ideal: 1280 } }, 
@@ -650,7 +581,7 @@
                     overlayElem.style.display = 'none';
                     btnElem.classList.add('active');
                     statusElem.textContent = 'ON';
-                    statusElem.style.color = '#00ffcc';
+                    statusElem.style.color = '#ffffff';
                 } catch (err) {
                     alert('Webカメラへのアクセスが拒否されたか、カメラが見つかりませんでした。');
                     console.error(err);
@@ -749,7 +680,7 @@
                 var clearOption = document.createElement('option');
                 clearOption.value = "__CLEAR_ALL__";
                 clearOption.textContent = "❌ CLEAR ALL HISTORY";
-                clearOption.style.color = "#ff3333";
+                clearOption.style.color = "#ef4444";
                 select.appendChild(clearOption);
             }
         }
@@ -847,10 +778,10 @@
             var val = (type === 'A') ? pointA : pointB;
         
             if (val === null) {
-                btn.innerHTML = type + "<br><span class='btn-status' style='color: #666;'>--:--</span>";
+                btn.innerHTML = type + "<br><span class='btn-status' style='color: #94a3b8;'>--:--</span>";
                 btn.classList.remove('active');
             } else {
-                btn.innerHTML = type + "<br><span class='btn-status' style='color: #00ffcc; font-weight: bold; font-size: 14px;'>" + formatTime(val) + "</span>";
+                btn.innerHTML = type + "<br><span class='btn-status' style='font-weight: 700; font-size: 13px;'>" + formatTime(val) + "</span>";
                 btn.classList.add('active');
             }
         }
@@ -1053,8 +984,8 @@
             }
 
             var tapBtn = document.getElementById('tapBtn');
-            tapBtn.style.background = 'linear-gradient(180deg, #555 0%, #333 100%)';
-            setTimeout(function() { tapBtn.style.background = ''; }, 50);
+            tapBtn.style.backgroundColor = '#ecfeff';
+            setTimeout(function() { tapBtn.style.backgroundColor = ''; }, 50);
         }
 
         var audioCtx = null;
@@ -1088,7 +1019,7 @@
                 scheduler();
                 
                 led.classList.add('on');
-                btn.style.borderColor = '#9933ff';
+                btn.style.borderColor = '#8b5cf6';
             } else {
                 if (metroTimer) clearTimeout(metroTimer);
                 
@@ -1148,17 +1079,14 @@
                 if (led && isMetroPlaying) {
                     led.classList.add('flash');
                     if (beatNumber === 0) {
-                        led.style.background = '#ff3b30';
-                        led.style.boxShadow = '0 0 10px #ff3b30';
+                        led.style.background = '#f43f5e';
                     } else {
-                        led.style.background = '#00ffcc';
-                        led.style.boxShadow = '0 0 10px #00ffcc';
+                        led.style.background = '#8b5cf6';
                     }
                     setTimeout(function() {
                         led.classList.remove('flash');
                         if (isMetroPlaying) {
-                            led.style.background = '#990000';
-                            led.style.boxShadow = 'none';
+                            led.style.background = '#8b5cf6';
                         }
                     }, 40);
                 }
@@ -1191,8 +1119,7 @@
                             if (led) {
                                 led.classList.remove('on');
                                 led.classList.remove('flash');
-                                led.style.background = '#333';
-                                led.style.boxShadow = 'none';
+                                led.style.background = '#cbd5e1';
                             }
                             if (btn) btn.style.borderColor = '';
                             
