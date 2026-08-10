@@ -11,8 +11,8 @@
             width: 100%;
             height: 100vh;
             overflow: hidden;
-            background-color: #f4f5f8;
-            color: #2d3748;
+            background-color: #f1f5f9;
+            color: #1e293b;
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
         }
 
@@ -25,52 +25,51 @@
             gap: 16px;
         }
         
-        /* 動画ID入力エリア */
+        /* ★URL入力エリア（枠線を無くし、コントラストを強化） */
         .input-container {
             width: 100%;
             display: flex;
             gap: 12px;
             background: #ffffff;
-            padding: 10px 16px;
+            padding: 8px 12px;
             border-radius: 16px;
-            border: 1px solid #e2e8f0;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.03);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
             box-sizing: border-box;
             flex-shrink: 0;
         }
         .input-container input {
             flex: 1;
-            padding: 10px 16px;
+            padding: 12px 18px;
             font-size: 14px;
+            font-weight: 500;
             background-color: #f8fafc;
-            border: 1px solid #e2e8f0;
-            border-radius: 10px;
-            color: #1a202c;
+            border: none;
+            border-radius: 12px;
+            color: #0f172a;
             font-family: inherit;
             transition: all 0.2s ease;
         }
         .input-container input:focus {
             outline: none;
-            border-color: #6366f1;
-            background-color: #ffffff;
-            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15);
+            background-color: #e2e8f0;
         }
         .input-container button {
-            padding: 10px 24px;
+            padding: 12px 28px;
             font-size: 14px;
-            background-color: #6366f1;
+            background-color: #4f46e5;
             color: #ffffff;
             border: none;
-            border-radius: 10px;
+            border-radius: 12px;
             cursor: pointer;
-            font-weight: 600;
+            font-weight: 700;
             letter-spacing: 0.5px;
             transition: all 0.2s ease;
-            box-shadow: 0 2px 8px rgba(99, 102, 241, 0.25);
+            box-shadow: 0 4px 12px rgba(79, 70, 229, 0.25);
         }
         .input-container button:hover {
-            background-color: #4f46e5;
+            background-color: #4338ca;
             transform: translateY(-1px);
+            box-shadow: 0 6px 16px rgba(79, 70, 229, 0.35);
         }
         
         /* プレイヤー＆Webカメラ メイン領域 */
@@ -118,7 +117,7 @@
         }
 
         .no-video-message {
-            color: #94a3b8;
+            color: #64748b;
             font-size: 16px;
             font-weight: 600;
             letter-spacing: 1px;
@@ -179,20 +178,17 @@
             flex-shrink: 0;
         }
         
-        /* 共通ボタン（洗練されたフラット/ソフトシャドウ風） */
+        /* ★共通ボタン（枠線完全廃止・背景ベタ塗り＆反転テキストカラー） */
         .btn {
             width: 130px;
             height: 56px;
             padding: 0;
             font-size: 13px;
-            color: #475569;
-            font-weight: 600;
+            font-weight: 700;
             font-family: inherit;
-            background: #ffffff;
-            border: 1px solid #e2e8f0;
+            border: none; /* 枠線を完全に排除 */
             border-radius: 14px;
             cursor: pointer;
-            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
             transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
             user-select: none;
             display: inline-flex;
@@ -205,10 +201,8 @@
         }
         .btn:focus { outline: none; }
         .btn:hover {
-            color: #1e293b;
-            border-color: #cbd5e1;
             transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+            filter: brightness(1.08);
         }
         .btn-status {
             font-size: 12px;
@@ -217,82 +211,53 @@
         }
         .btn:active {
             transform: translateY(0);
-            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+            filter: brightness(0.95);
         }
 
-        /* カラー・テーマ設定 */
+        /* カラー・テーマ設定（背景色 × 白文字） */
         .btn-blue {
-            background-color: #ffffff;
-            border-color: #e2e8f0;
-            color: #3b82f6;
-        }
-        .btn-blue:hover {
-            background-color: #eff6ff;
-            border-color: #bfdbfe;
-            color: #2563eb;
+            background-color: #3b82f6;
+            color: #ffffff;
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
         }
 
         .btn.speed-btn {
-            background-color: #ffffff;
-            border-color: #e2e8f0;
-            color: #10b981;
-        }
-        .btn.speed-btn:hover {
-            background-color: #ecfdf5;
-            border-color: #a7f3d0;
-            color: #059669;
+            background-color: #10b981;
+            color: #ffffff;
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
         }
 
         .btn.ab-btn {
-            background-color: #ffffff;
-            border-color: #e2e8f0;
-            color: #f43f5e;
-        }
-        .btn.ab-btn:hover {
-            background-color: #fff1f2;
-            border-color: #fecdd3;
-            color: #e11d48;
+            background-color: #f43f5e;
+            color: #ffffff;
+            box-shadow: 0 4px 12px rgba(244, 63, 94, 0.3);
         }
         .btn.ab-btn.active {
-            background: #f43f5e !important;
-            color: #ffffff !important;
-            border-color: #f43f5e !important;
-            box-shadow: 0 4px 14px rgba(244, 63, 94, 0.3) !important;
+            background-color: #be123c !important;
+            box-shadow: 0 6px 16px rgba(190, 18, 60, 0.4) !important;
         }
 
         .btn.tap-btn {
-            background-color: #ffffff;
-            border-color: #e2e8f0;
-            color: #06b6d4;
-        }
-        .btn.tap-btn:hover {
-            background-color: #ecfeff;
-            border-color: #a5f3fc;
-            color: #0891b2;
+            background-color: #06b6d4;
+            color: #ffffff;
+            box-shadow: 0 4px 12px rgba(6, 182, 212, 0.3);
         }
 
         .btn.metro-btn {
-            background-color: #ffffff;
-            border-color: #e2e8f0;
-            color: #8b5cf6;
-        }
-        .btn.metro-btn:hover {
-            background-color: #f5f3ff;
-            border-color: #ddd6fe;
-            color: #7c3aed;
+            background-color: #8b5cf6;
+            color: #ffffff;
+            box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3);
         }
 
         /* カメラトグルボタン */
         .btn.camera-btn {
-            background-color: #ffffff;
-            border-color: #e2e8f0;
-            color: #64748b;
+            background-color: #64748b;
+            color: #ffffff;
+            box-shadow: 0 4px 12px rgba(100, 116, 139, 0.25);
         }
         .btn.camera-btn.active {
-            background: #10b981 !important;
-            color: #ffffff !important;
-            border-color: #10b981 !important;
-            box-shadow: 0 4px 14px rgba(16, 185, 129, 0.3) !important;
+            background-color: #10b981 !important;
+            box-shadow: 0 4px 14px rgba(16, 185, 129, 0.35) !important;
         }
 
         .ab-btn { position: relative; }
@@ -304,20 +269,20 @@
             background: #ffffff;
             padding: 4px 8px;
             border-radius: 16px;
-            border: 1px solid #e2e8f0;
+            border: none;
             gap: 8px;
-            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.03);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
         }
 
         .speed-display {
-            background: #f8fafc;
+            background: #f1f5f9;
             padding: 4px 12px;
             border-radius: 10px;
             font-size: 10px;
             font-weight: 700;
-            color: #94a3b8;
+            color: #64748b;
             text-align: center;
-            border: 1px solid #f1f5f9;
+            border: none;
             height: 38px;
             overflow: hidden;
             position: relative;
@@ -335,7 +300,7 @@
         
         .speed-reel-item {
             font-size: 16px;
-            color: #10b981;
+            color: #059669;
             font-weight: 700;
             height: 24px;
             line-height: 24px;
@@ -359,13 +324,13 @@
         #bpmInput {
             width: 70px;
             height: 44px;
-            background-color: #f8fafc;
-            border: 1px solid #e2e8f0;
+            background-color: #f1f5f9;
+            border: none;
             border-radius: 10px;
             font-family: inherit;
             font-size: 18px;
             font-weight: 700;
-            color: #7c3aed;
+            color: #6d28d9;
             text-align: center;
             margin: 0;
             outline: none;
@@ -373,13 +338,11 @@
             cursor: pointer;
         }
         #bpmInput:hover {
-            border-color: #cbd5e1;
-            background-color: #ffffff;
+            background-color: #e2e8f0;
         }
         #bpmInput:focus {
-            border-color: #8b5cf6;
-            background-color: #ffffff;
-            box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.15);
+            background-color: #e2e8f0;
+            color: #5b21b6;
         }
 
         #bpmInput::-webkit-outer-spin-button,
@@ -410,31 +373,32 @@
         .metro-led {
             width: 6px;
             height: 6px;
-            background-color: #cbd5e1;
+            background-color: rgba(255, 255, 255, 0.4);
             border-radius: 50%;
             transition: all 0.2s;
         }
         
-        .metro-led.on { background-color: #8b5cf6; }
-        .metro-led.flash { transform: scale(1.4); }
+        .metro-led.on { background-color: #ffffff; }
+        .metro-led.flash { transform: scale(1.5); }
 
         #videoHistorySelect {
-            padding: 8px 12px;
+            padding: 10px 14px;
             font-size: 13px;
+            font-weight: 600;
             font-family: inherit;
             background-color: #f8fafc;
-            color: #475569;
-            border: 1px solid #e2e8f0;
-            border-radius: 10px;
+            color: #334155;
+            border: none;
+            border-radius: 12px;
             cursor: pointer;
             outline: none;
             max-width: 260px;
-            transition: border-color 0.2s;
+            transition: background-color 0.2s;
         }
-        #videoHistorySelect:hover { border-color: #cbd5e1; }
+        #videoHistorySelect:hover { background-color: #e2e8f0; }
         #videoHistorySelect option {
             background-color: #ffffff;
-            color: #1e293b;
+            color: #0f172a;
         }
     </style>
 </head>
@@ -483,14 +447,14 @@
                         onmouseup="endPress('A')" 
                         onmouseleave="cancelPress('A')"
                         ontouchstart="startPress('A')" 
-                        ontouchend="endPress('A')">A<br><span class="btn-status" style="color: #94a3b8;">--:--</span></button>
+                        ontouchend="endPress('A')">A<br><span class="btn-status" style="color: rgba(255,255,255,0.7);">--:--</span></button>
                         
                 <button class="btn ab-btn" id="btnB" 
                         onmousedown="startPress('B')" 
                         onmouseup="endPress('B')" 
                         onmouseleave="cancelPress('B')"
                         ontouchstart="startPress('B')" 
-                        ontouchend="endPress('B')">B<br><span class="btn-status" style="color: #94a3b8;">--:--</span></button>
+                        ontouchend="endPress('B')">B<br><span class="btn-status" style="color: rgba(255,255,255,0.7);">--:--</span></button>
 
                 <div class="tap-panel">
                     <button class="btn metro-btn" id="metroBtn" onclick="toggleMetronome()">
@@ -515,7 +479,7 @@
             <!-- カメラ側コントロール -->
             <div class="controls">
                 <button class="btn camera-btn" id="cameraToggleBtn" onclick="toggleCamera()">
-                    CAMERA<br><span class="btn-status" id="cameraStatusText" style="color: #94a3b8;">OFF</span>
+                    CAMERA<br><span class="btn-status" id="cameraStatusText" style="color: rgba(255,255,255,0.7);">OFF</span>
                 </button>
             </div>
         </div>
@@ -569,7 +533,7 @@
                 overlayElem.style.display = 'block';
                 btnElem.classList.remove('active');
                 statusElem.textContent = 'OFF';
-                statusElem.style.color = '#94a3b8';
+                statusElem.style.color = 'rgba(255,255,255,0.7)';
             } else {
                 try {
                     cameraStream = await navigator.mediaDevices.getUserMedia({ 
@@ -778,10 +742,10 @@
             var val = (type === 'A') ? pointA : pointB;
         
             if (val === null) {
-                btn.innerHTML = type + "<br><span class='btn-status' style='color: #94a3b8;'>--:--</span>";
+                btn.innerHTML = type + "<br><span class='btn-status' style='color: rgba(255,255,255,0.7);'>--:--</span>";
                 btn.classList.remove('active');
             } else {
-                btn.innerHTML = type + "<br><span class='btn-status' style='font-weight: 700; font-size: 13px;'>" + formatTime(val) + "</span>";
+                btn.innerHTML = type + "<br><span class='btn-status' style='font-weight: 700; font-size: 13px; color: #ffffff;'>" + formatTime(val) + "</span>";
                 btn.classList.add('active');
             }
         }
@@ -984,8 +948,8 @@
             }
 
             var tapBtn = document.getElementById('tapBtn');
-            tapBtn.style.backgroundColor = '#ecfeff';
-            setTimeout(function() { tapBtn.style.backgroundColor = ''; }, 50);
+            tapBtn.style.filter = 'brightness(1.2)';
+            setTimeout(function() { tapBtn.style.filter = ''; }, 50);
         }
 
         var audioCtx = null;
@@ -1005,7 +969,6 @@
 
             isMetroPlaying = !isMetroPlaying;
             var led = document.getElementById('metroLed');
-            var btn = document.getElementById('metroBtn');
 
             if (isMetroPlaying) {
                 var currentBPM = parseInt(document.getElementById('bpmInput').value);
@@ -1019,7 +982,6 @@
                 scheduler();
                 
                 led.classList.add('on');
-                btn.style.borderColor = '#8b5cf6';
             } else {
                 if (metroTimer) clearTimeout(metroTimer);
                 
@@ -1030,7 +992,6 @@
 
                 led.classList.remove('on');
                 led.classList.remove('flash');
-                btn.style.borderColor = '';
             }
         }
 
@@ -1081,12 +1042,12 @@
                     if (beatNumber === 0) {
                         led.style.background = '#f43f5e';
                     } else {
-                        led.style.background = '#8b5cf6';
+                        led.style.background = '#ffffff';
                     }
                     setTimeout(function() {
                         led.classList.remove('flash');
                         if (isMetroPlaying) {
-                            led.style.background = '#8b5cf6';
+                            led.style.background = '#ffffff';
                         }
                     }, 40);
                 }
@@ -1115,13 +1076,11 @@
                             isMetroPlaying = false;
 
                             var led = document.getElementById('metroLed');
-                            var btn = document.getElementById('metroBtn');
                             if (led) {
                                 led.classList.remove('on');
                                 led.classList.remove('flash');
-                                led.style.background = '#cbd5e1';
+                                led.style.background = 'rgba(255,255,255,0.4)';
                             }
-                            if (btn) btn.style.borderColor = '';
                             
                             currentBeat = 0; 
                             
