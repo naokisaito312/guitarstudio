@@ -5,26 +5,28 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Guitar Lesson Studio</title>
     <style>
-        body {
+       body {
             margin: 0;
-            padding: 20px;
-            background-color: #121214; /* 重厚感のあるダークグレー */
+            padding: 10px 15px; /* 上下のパディングを極小に */
+            background-color: #121214;
             color: #e0e0e0;
-            font-family: 'Consolas', 'Courier New', monospace; /* メーターや文字をデジタル感を出すフォントに */
+            font-family: 'Consolas', 'Courier New', monospace;
             display: flex;
             flex-direction: column;
             align-items: center;
+            min-height: 100vh;
+            box-sizing: border-box;
         }
         
-        /* 動画ID入力エリア（エフェクターのインプット風） */
+        /* 動画ID入力エリア */
         .input-container {
-            margin-bottom: 25px;
-            width: 85vw;
-            max-width: 1200px;
+            margin-bottom: 12px; /* 隙間を詰める */
+            width: 96vw;
+            max-width: 1800px; /* 大画面ディスプレイに合わせて拡張 */
             display: flex;
             gap: 10px;
             background: #1a1a1e;
-            padding: 10px;
+            padding: 8px 12px;
             border-radius: 6px;
             border: 1px solid #2d2d34;
             box-shadow: inset 0 2px 5px rgba(0,0,0,0.5);
@@ -37,7 +39,7 @@
             background-color: #0d0d0f;
             border: 1px solid #3a3a45;
             border-radius: 4px;
-            color: #00ffcc; /* ネオン（サイバー）グリーン */
+            color: #00ffcc;
             font-family: inherit;
         }
         .input-container input:focus {
@@ -46,7 +48,7 @@
             box-shadow: 0 0 8px rgba(0,255,204,0.3);
         }
         .input-container button {
-            padding: 10px 20px;
+            padding: 10px 24px;
             font-size: 14px;
             background-color: #B40000;
             color: #fff;
@@ -63,24 +65,24 @@
         
         /* プレイヤー＆Webカメラのレイアウト用統合ラッパー */
         .stage-wrapper {
-            width: 85vw;
-            max-width: 1200px;
+            width: 96vw;
+            max-width: 1800px; /* 大画面ディスプレイに合わせて拡張 */
             display: flex;
-            gap: 15px;
+            gap: 12px;
             align-items: stretch;
-            margin-bottom: 10px;
+            margin-bottom: 12px;
         }
 
-        /* プレイヤーのラッパー（モニター画面風） */
+        /* プレイヤーのラッパー */
         .video-container {
-            flex: 1; /* 横幅を柔軟に調整 */
-            aspect-ratio: 16 / 9; /* アスペクト比固定 */
+            flex: 1;
+            aspect-ratio: 16 / 9;
             position: relative;
             background-color: #000;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.7), 0 0 1px #00ffcc; /* 微かなネオンの反射 */
+            box-shadow: 0 10px 30px rgba(0,0,0,0.7), 0 0 1px #00ffcc;
             border-radius: 8px;
             overflow: hidden;
-            border: 4px solid #2d2d34; /* 頑丈な金属フレーム風 */
+            border: 4px solid #2d2d34;
             box-sizing: border-box;
             display: flex;
             justify-content: center;
@@ -90,7 +92,7 @@
         /* 初期動画なし状態のダミー表示 */
         .no-video-message {
             color: #555;
-            font-size: 16px;
+            font-size: 18px;
             font-weight: bold;
             letter-spacing: 2px;
             text-shadow: 0 0 5px rgba(0,0,0,0.8);
@@ -108,7 +110,7 @@
 
         /* Webカメラプレビュー領域 */
         .camera-container {
-            width: 200px; /* 縦長表示用サイズ */
+            width: 260px; /* 横幅を少し拡大して見やすく調整 */
             background-color: #050507;
             border: 4px solid #2d2d34;
             border-radius: 8px;
@@ -125,14 +127,14 @@
         .camera-container video {
             width: 100%;
             height: 100%;
-            object-fit: cover; /* 縦長枠いっぱいにトリミング表示 */
-            transform: scaleX(-1); /* 自撮り（鏡映し）モード */
+            object-fit: cover;
+            transform: scaleX(-1);
             display: none;
         }
 
         .camera-overlay {
             color: #666;
-            font-size: 11px;
+            font-size: 12px;
             text-align: center;
             padding: 10px;
             user-select: none;
@@ -142,15 +144,15 @@
             color: #00ffcc;
         }
         
-        /* エフェクターのコントロールパネル（シャーシ） */
+        /* エフェクターのコントロールパネル */
         .controls {
-            margin-top: 15px;
-            width: 85vw;
-            max-width: 1200px;
-            background: linear-gradient(180deg, #25252c 0%, #1a1a1e 100%); /* 金属のヘアラインを意識したグラデ */
+            margin-top: 0;
+            width: 96vw;
+            max-width: 1800px; /* 大画面ディスプレイに合わせて拡張 */
+            background: linear-gradient(180deg, #25252c 0%, #1a1a1e 100%);
             border: 2px solid #3a3a45;
             border-radius: 12px;
-            padding: 20px 30px;
+            padding: 15px 20px;
             display: flex;
             gap: 15px;
             justify-content: center;
