@@ -133,6 +133,58 @@
             transition: opacity 0.05s linear;
         }
 
+        /* ★自前ミニマル再生バー（動画最下部に常時表示） */
+        .minimal-progressbar-container {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 14px; /* クリックしやすい判定幅 */
+            z-index: 10;
+            display: flex;
+            align-items: flex-end;
+            cursor: pointer;
+            background: linear-gradient(to top, rgba(0,0,0,0.3), transparent);
+        }
+
+        .minimal-progressbar-bg {
+            width: 100%;
+            height: 4px;
+            background-color: rgba(255, 255, 255, 0.25);
+            transition: height 0.15s ease;
+            position: relative;
+        }
+
+        .minimal-progressbar-container:hover .minimal-progressbar-bg {
+            height: 6px;
+        }
+
+        .minimal-progressbar-fill {
+            width: 0%;
+            height: 100%;
+            background-color: #ef4444; /* YouTubeの伝統的なレッド */
+            transition: width 0.1s linear;
+            position: relative;
+        }
+
+        /* 先端の小さな丸（ピン） */
+        .minimal-progressbar-fill::after {
+            content: '';
+            position: absolute;
+            right: -5px;
+            top: 50%;
+            transform: translateY(-50%) scale(0);
+            width: 10px;
+            height: 10px;
+            background-color: #ef4444;
+            border-radius: 50%;
+            transition: transform 0.15s ease;
+        }
+
+        .minimal-progressbar-container:hover .minimal-progressbar-fill::after {
+            transform: translateY(-50%) scale(1);
+        }
+
         /* Webカメラプレビュー領域 */
         .camera-container {
             width: 100%;
@@ -420,6 +472,13 @@
             <div class="video-container">
                 <div id="player"></div>
                 <div id="noVideoMsg" class="no-video-message">NO VIDEO LOADED</div>
+                
+                <!-- 自前ミニマル再生バー -->
+                <div class="minimal-progressbar-container" id="miniProgressContainer">
+                    <div class="minimal-progressbar-bg">
+                        <div class="minimal-progressbar-fill" id="miniProgressFill"></div>
+                    </div>
+                </div>
             </div>
             
             <!-- 動画側コントロール -->
@@ -687,6 +746,70 @@
                 if (pointA === null || pointB === null) stopLoopCheck();
             }
         }
+
+        /* ★ミニマル再生バーの同期＆シーク処理 */
+        var isMiniProgressBarSeeking = false;
+
+        setInterval(function() {
+            if (!player || typeof player.getCurrentTime !== 'function' || isMiniProgressBarSeeking) return;
+
+            var currentTime = player.getCurrentTime();
+            var duration = player.getDuration();
+
+            if (duration > 0) {
+                var percentage = (currentTime / duration) * 100;
+                var fillElem = document.getElementById('miniProgressFill');
+                if (fillElem) fillElem.style.width = percentage + '%';
+            }
+        }, 250);
+
+        function handleMiniProgressSeek(e) {
+            if (!player || typeof player.getDuration !== 'function') return;
+            var container = document.getElementById('miniProgressContainer');
+            if (!container) return;
+
+            var rect = container.getBoundingClientRect();
+            var clickX = e.clientX - rect.left;
+            var width = rect.width;
+
+            if (width > 0) {
+                var ratio = Math.max(0, Math.min(1, clickX / width));
+                var duration = player.getDuration();
+                var fillElem = document.getElementById('miniProgressFill');
+                if (fillElem) fillElem.style.width = (ratio * 100) + '%';
+                player.seekTo(ratio * duration, true);
+            }
+        }
+
+        window.addEventListener('DOMContentLoaded', function() {
+            var container = document.getElementById('miniProgressContainer');
+            if (container) {
+                container.addEventListener('mousedown', function(e) {
+                    isMiniProgressBarSeeking = true;
+                    handleMiniProgressSeek(e);
+                });
+
+                window.addEventListener('mousemove', function(e) {
+                    if (isMiniProgressBarSeeking) handleMiniProgressSeek(e);
+                });
+
+                window.addEventListener('mouseup', function(e) {
+                    if (isMiniProgressBarSeeking) isMiniProgressBarSeeking = false;
+                });
+
+                // タッチ対応
+                container.addEventListener('touchstart', function(e) {
+                    isMiniProgressBarSeeking = true;
+                    if (e.touches.length > 0) handleMiniProgressSeek(e.touches[0]);
+                });
+                window.addEventListener('touchmove', function(e) {
+                    if (isMiniProgressBarSeeking && e.touches.length > 0) handleMiniProgressSeek(e.touches[0]);
+                });
+                window.addEventListener('touchend', function() {
+                    isMiniProgressBarSeeking = false;
+                });
+            }
+        });
 
         function startPress(type) {
             isLongPress = false;
