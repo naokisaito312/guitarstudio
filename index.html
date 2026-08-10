@@ -9,41 +9,42 @@
             margin: 0;
             padding: 0;
             width: 100%;
-            height: 100vh; /* 画面の高さいっぱいに固定 */
-            overflow: hidden; /* 余計なスクロールを発生させない */
+            height: 100vh;
+            overflow: hidden; /* スクロールなし */
             background-color: #121214;
             color: #e0e0e0;
             font-family: 'Consolas', 'Courier New', monospace;
         }
 
         body {
-            padding: 10px 16px;
+            /* Google TV Design Guidelines: 左右 48px, 上下 36px の Overscan Safe Area マージンを設定 */
+            padding: 36px 48px;
             display: flex;
             flex-direction: column;
             box-sizing: border-box;
-            gap: 8px; /* 各要素の縦の隙間を8pxで固定 */
+            gap: 16px; /* テレビ画面で見やすい間隔（16px） */
         }
         
         /* 動画ID入力エリア */
         .input-container {
             width: 100%;
             display: flex;
-            gap: 10px;
+            gap: 12px;
             background: #1a1a1e;
-            padding: 6px 10px;
-            border-radius: 6px;
+            padding: 8px 12px;
+            border-radius: 8px;
             border: 1px solid #2d2d34;
             box-shadow: inset 0 2px 5px rgba(0,0,0,0.5);
             box-sizing: border-box;
-            flex-shrink: 0; /* 潰れないように固定 */
+            flex-shrink: 0;
         }
         .input-container input {
             flex: 1;
-            padding: 8px 12px;
-            font-size: 14px;
+            padding: 10px 14px;
+            font-size: 15px;
             background-color: #0d0d0f;
             border: 1px solid #3a3a45;
-            border-radius: 4px;
+            border-radius: 6px;
             color: #00ffcc;
             font-family: inherit;
         }
@@ -53,12 +54,12 @@
             box-shadow: 0 0 8px rgba(0,255,204,0.3);
         }
         .input-container button {
-            padding: 8px 20px;
-            font-size: 14px;
+            padding: 10px 24px;
+            font-size: 15px;
             background-color: #B40000;
             color: #fff;
             border: none;
-            border-radius: 4px;
+            border-radius: 6px;
             cursor: pointer;
             font-weight: bold;
             text-transform: uppercase;
@@ -68,13 +69,13 @@
             background-color: #FF0000;
         }
         
-        /* プレイヤー＆Webカメラ領域（画面の残りの高さをすべて使う） */
+        /* プレイヤー＆Webカメラ領域 */
         .stage-wrapper {
             width: 100%;
-            flex: 1; /* ★ 画面縦幅の空き領域を限界まで広げる */
-            min-height: 0; /* flexアイテムの縮小バグ防止 */
+            flex: 1; /* マージンを除いた高さを最大活用 */
+            min-height: 0;
             display: flex;
-            gap: 10px;
+            gap: 16px;
             align-items: stretch;
         }
 
@@ -85,7 +86,7 @@
             position: relative;
             background-color: #000;
             box-shadow: 0 10px 30px rgba(0,0,0,0.7), 0 0 1px #00ffcc;
-            border-radius: 8px;
+            border-radius: 10px;
             overflow: hidden;
             border: 3px solid #2d2d34;
             box-sizing: border-box;
@@ -115,11 +116,11 @@
 
         /* Webカメラプレビュー領域 */
         .camera-container {
-            width: 280px; /* 横幅をやや広げて操作感を向上 */
+            width: 280px;
             height: 100%;
             background-color: #050507;
             border: 3px solid #2d2d34;
-            border-radius: 8px;
+            border-radius: 10px;
             overflow: hidden;
             position: relative;
             box-shadow: 0 10px 30px rgba(0,0,0,0.7), 0 0 1px #00ffcc;
@@ -141,7 +142,7 @@
 
         .camera-overlay {
             color: #666;
-            font-size: 12px;
+            font-size: 13px;
             text-align: center;
             padding: 10px;
             user-select: none;
@@ -157,15 +158,15 @@
             background: linear-gradient(180deg, #25252c 0%, #1a1a1e 100%);
             border: 2px solid #3a3a45;
             border-radius: 10px;
-            padding: 10px 16px; /* 上下パディングをコンパクト化 */
+            padding: 12px 20px;
             display: flex;
-            gap: 12px;
+            gap: 16px;
             justify-content: center;
             align-items: center;
             flex-wrap: wrap;
             box-shadow: 0 8px 20px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.1);
             box-sizing: border-box;
-            flex-shrink: 0; /* 下部にぴったり固定 */
+            flex-shrink: 0;
         }
         
         /* 共通ボタン（フットスイッチ・頑丈なメタルボタン風） */
