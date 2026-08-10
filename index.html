@@ -93,6 +93,7 @@
             display: flex;
             justify-content: center;
             align-items: center;
+            min-width: 0; /* フレックス要素の破綻防止 */
         }
 
         /* 初期動画なし状態のダミー表示 */
@@ -114,9 +115,10 @@
             transition: opacity 0.05s linear;
         }
 
-        /* Webカメラプレビュー領域（2倍の560pxへ拡大） */
+        /* Webカメラプレビュー領域（560pxの1.5倍 ＝ 840px へ拡大） */
         .camera-container {
-            width: 560px; /* ★ 元の280pxから2倍に変更 */
+            width: 840px; /* ★ 560px × 1.5 = 840px */
+            max-width: 45vw; /* 超高解像度ディスプレイでも画面の半分を超えないようガード */
             height: 100%;
             background-color: #050507;
             border: 3px solid #2d2d34;
@@ -142,7 +144,7 @@
 
         .camera-overlay {
             color: #666;
-            font-size: 14px;
+            font-size: 15px;
             text-align: center;
             padding: 10px;
             user-select: none;
