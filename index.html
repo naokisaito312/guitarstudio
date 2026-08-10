@@ -69,7 +69,7 @@
             background-color: #FF0000;
         }
         
-        /* プレイヤー＆Webカメラ領域 */
+        /* プレイヤー＆Webカメラ メイン領域 */
         .stage-wrapper {
             width: 100%;
             flex: 1;
@@ -79,10 +79,29 @@
             align-items: stretch;
         }
 
+        /* 縦並びの各カラム（動画側・カメラ側） */
+        .stage-column {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            height: 100%;
+        }
+
+        .stage-column.video-column {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .stage-column.camera-column {
+            width: 840px; /* 前回の840px指定を維持 */
+            max-width: 45vw;
+            flex-shrink: 0;
+        }
+
         /* プレイヤーのラッパー */
         .video-container {
+            width: 100%;
             flex: 1;
-            height: 100%;
             position: relative;
             background-color: #000;
             box-shadow: 0 10px 30px rgba(0,0,0,0.7), 0 0 1px #00ffcc;
@@ -93,10 +112,8 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            min-width: 0; /* フレックス要素の破綻防止 */
         }
 
-        /* 初期動画なし状態のダミー表示 */
         .no-video-message {
             color: #555;
             font-size: 18px;
@@ -115,11 +132,10 @@
             transition: opacity 0.05s linear;
         }
 
-        /* Webカメラプレビュー領域（560pxの1.5倍 ＝ 840px へ拡大） */
+        /* Webカメラプレビュー領域 */
         .camera-container {
-            width: 840px; /* ★ 560px × 1.5 = 840px */
-            max-width: 45vw; /* 超高解像度ディスプレイでも画面の半分を超えないようガード */
-            height: 100%;
+            width: 100%;
+            flex: 1;
             background-color: #050507;
             border: 3px solid #2d2d34;
             border-radius: 10px;
@@ -129,9 +145,7 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            cursor: pointer;
             box-sizing: border-box;
-            flex-shrink: 0;
         }
 
         .camera-container video {
@@ -150,37 +164,28 @@
             user-select: none;
             transition: color 0.2s;
         }
-        .camera-container:hover .camera-overlay {
-            color: #00ffcc;
-        }
-        
-        /* エフェクターのコントロールパネル */
+
+        /* ★コントロールパネル（グレー背景を撤去し、センター合わせで並べる） */
         .controls {
             width: 100%;
-            background: linear-gradient(180deg, #25252c 0%, #1a1a1e 100%);
-            border: 2px solid #3a3a45;
-            border-radius: 10px;
-            padding: 12px 20px;
+            padding: 4px 0;
             display: flex;
             gap: 16px;
             justify-content: center;
             align-items: center;
             flex-wrap: wrap;
-            box-shadow: 0 8px 20px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.1);
             box-sizing: border-box;
             flex-shrink: 0;
         }
         
-        /* 共通ボタン（フットスイッチ・頑丈なメタルボタン風） */
+        /* 共通ボタン（フットスイッチ風） */
         .btn {
             width: 140px;
             height: 60px;
             padding: 0;
-            /* 1行目の基本スタイル */
             font-size: 14px;
-            color: #bbb;           /* 普段は少し控えめなグレーに */
-            letter-spacing: 1px;   /* 文字の間隔を少し広げて機材の印字っぽく */
-            
+            color: #bbb;
+            letter-spacing: 1px;
             font-weight: bold;
             font-family: inherit;
             background: linear-gradient(180deg, #3a3a45 0%, #25252c 100%);
@@ -192,43 +197,33 @@
             user-select: none;
             text-transform: uppercase;
             display: inline-flex;
-            flex-direction: column; /* 上下2行に並びやすくする */
+            flex-direction: column;
             justify-content: center;
             align-items: center;
             text-align: center;
             line-height: 1.4;
             outline: none;
         }
-        .btn:focus {
-            outline: none;
-        }
-        
+        .btn:focus { outline: none; }
         .btn:hover {
             color: #ddd;
             background: linear-gradient(180deg, #454552 0%, #2d2d36 100%);
         }
-        
         .btn-status {
-            font-size: 12px;       /* 2行目の文字サイズ */
-            margin-top: 2px;       /* 1行目との隙間を微調整 */
-            font-family: 'Consolas', 'Courier New', monospace; /* デジタル数字感を強調 */
+            font-size: 12px;
+            margin-top: 2px;
+            font-family: 'Consolas', 'Courier New', monospace;
         }
-        
         .btn:active {
             transform: translateY(2px);
             box-shadow: 0 1px 2px rgba(0,0,0,0.5);
         }
 
-        /* ==================================================
-           ★ 自作フットコントローラーと完全に同期するカラー設定
-        ================================================== */
-
-        /* 1. 再生/一時停止、10秒戻し、10秒送り：少し濃い青色 */
+        /* カラー設定 */
         .btn-blue {
             border-color: #0055ff !important;
             color: #88b0ff !important;
         }
-        /* マウスホバー時、およびフットペダルを踏み込んだ（アクティブ）際の発光 */
         .btn-blue:hover, .btn-blue:active {
             border-color: #3377ff !important;
             color: #b3ccff !important;
@@ -238,7 +233,6 @@
             box-shadow: 0 0 15px rgba(0, 85, 255, 0.6), inset 0 2px 5px rgba(0,0,0,0.8) !important;
         }
 
-        /* 2. 再生速度変更：黄色に近い黄緑 */
         .btn.speed-btn {
             border-color: #99cc00 !important;
             color: #d2ff4d !important;
@@ -252,7 +246,6 @@
             box-shadow: 0 0 15px rgba(153, 204, 0, 0.6), inset 0 2px 5px rgba(0,0,0,0.8) !important;
         }
 
-        /* 3. A, Bボタン：赤（長押しクリア時や、フットペダルを踏んだ瞬間の色） */
         .btn.ab-btn {
             border-color: #ff3333 !important;
             color: #ff8888 !important;
@@ -265,7 +258,6 @@
             background: #550000 !important;
             box-shadow: 0 0 15px rgba(255, 51, 51, 0.6), inset 0 2px 5px rgba(0,0,0,0.8) !important;
         }
-        /* ★【重要】A/B点記憶時（トグルON状態）も赤色で常時ネオン発光させる設定 */
         .btn.ab-btn.active {
             background: linear-gradient(180deg, #440000 0%, #220000 100%) !important;
             color: #fff !important;
@@ -277,7 +269,6 @@
             border-color: #ff4d4d !important;
         }
 
-        /* 4. TAPボタン：少し明るい青 */
         .btn.tap-btn {
             border-color: #00ccff !important;
             color: #99eeff !important;
@@ -291,7 +282,6 @@
             box-shadow: 0 0 15px rgba(0, 204, 255, 0.6), inset 0 2px 5px rgba(0,0,0,0.8) !important;
         }
 
-        /* 5. METRO：紫 */
         .btn.metro-btn {
             border-color: #9933ff !important;
             color: #ddbfff !important;
@@ -300,28 +290,26 @@
             border-color: #b366ff !important;
             color: #eedfff !important;
         }
-        /* メトロノーム動作中（枠線が赤くなっていた箇所を自作ペダルの『紫』に同期） */
         .btn.metro-btn:active, .btn.metro-btn[style*="border-color"] {
             background: #220044 !important;
             border-color: #9933ff !important;
             box-shadow: 0 0 15px rgba(153, 51, 255, 0.6), inset 0 2px 5px rgba(0,0,0,0.8) !important;
         }
-        /* Aボタン、Bボタンの追加スタイル */
-        .ab-btn {
-            position: relative;
+
+        /* ★カメラON/OFFトグル専用ボタン */
+        .btn.camera-btn {
+            border-color: #444 !important;
+            color: #888 !important;
         }
-        /* A/B点 設定時のLED点灯エフェクト */
-        .ab-btn.active {
-            background: linear-gradient(180deg, #1e3d2f 0%, #11241b 100%);
-            color: #a0ffd0;        /* 設定時は1行目も少し緑がかった薄い色に */
-            border-color: #00ffcc;
-            box-shadow: 0 0 12px rgba(0,255,204,0.3), inset 0 1px 0 rgba(255,255,255,0.1);
-        }
-        .ab-btn.active:hover {
-            background: linear-gradient(180deg, #27523f 0%, #163024 100%);
+        .btn.camera-btn.active {
+            border-color: #00ffcc !important;
+            color: #00ffcc !important;
+            background: linear-gradient(180deg, #00332c 0%, #001a16 100%) !important;
+            box-shadow: 0 0 15px rgba(0, 255, 204, 0.4) !important;
         }
 
-        /* ★新設：速度コントロール全体の枠 */
+        .ab-btn { position: relative; }
+
         .speed-panel {
             display: flex;
             align-items: center;
@@ -332,7 +320,6 @@
             gap: 10px;
         }
 
-        /* 液晶ディスプレイ風の速度表示窓 */
         .speed-display {
             background: #1a1a1e;
             padding: 5px 15px;
@@ -342,24 +329,21 @@
             text-align: center;
             border: 1px solid #2d2d34;
             box-shadow: inset 0 2px 3px rgba(0,0,0,0.6);
-            /* ↓ スライド表示のために縦幅を固定し、はみ出た数字を隠します */
             height: 38px;
             overflow: hidden;
             position: relative;
         }
         
-        /* スライドする縦長の帯 */
         .speed-reel {
             display: flex;
             flex-direction: column;
             position: absolute;
             left: 0;
             right: 0;
-            top: 20px; /* 「SPEED」文字の下に配置 */
+            top: 20px;
             transition: transform 0.25s cubic-bezier(0.25, 1, 0.5, 1);
         }
         
-        /* 帯の中の各スピード数字 */
         .speed-reel-item {
             font-size: 18px;
             color: #d2ff4d;
@@ -367,36 +351,29 @@
             height: 24px;
             line-height: 24px;
             text-shadow: 0 0 10px rgba(153, 204, 0, 0.8);
-            /* ★【追加】標準状態（選ばれていない時）はフェードアウトして消す */
             opacity: 0;
             transition: opacity 0.2s ease, text-shadow 0.2s ease;
         }
         
-        /* ★【新規追加】現在選ばれている速度（アクティブ）だけを表示する */
-        .speed-reel-item.active {
-            opacity: 1;
-        }
+        .speed-reel-item.active { opacity: 1; }
         
-        /* 1.0x かつ アクティブな時だけグリーンに光らせる */
         .speed-reel-item.default-speed.active {
             color: #d2ff4d;
             text-shadow: 0 0 10px rgba(153, 204, 0, 0.8);
         }
 
-        /* 速度調整ボタンのレイアウト調整 */
         .speed-buttons {
             display: flex;
-            flex-direction: column; /* 縦に2つ並べてスッキリさせる */
+            flex-direction: column;
             gap: 6px;
         }
         .btn.speed-btn {
             width: 90px;
-            height: 27px; /* 高さを半分にしてコンパクトに */
+            height: 27px;
             font-size: 12px;
             border-radius: 3px;
         }
 
-        /* ★新設：TAPコントロール全体の枠 */
         .tap-panel {
             display: flex;
             align-items: center;
@@ -406,9 +383,7 @@
             border: 1px dashed #3a3a45;
             gap: 10px;
         }
-        /* --------------------------------------------------
-           ★新設・カスタム：エフェクターの液晶風BPM入力窓
-        -------------------------------------------------- */
+
         #bpmInput {
             width: 76px;
             height: 44px;
@@ -418,9 +393,9 @@
             font-family: 'Consolas', 'Courier New', monospace;
             font-size: 20px;
             font-weight: bold;
-            color: #ddbfff; /* METROボタンの #ddbfff と完全にシンクロ */
+            color: #ddbfff;
             text-align: center;
-            text-shadow: 0 0 10px rgba(153, 51, 255, 0.8); /* 紫色の発光エフェクト */
+            text-shadow: 0 0 10px rgba(153, 51, 255, 0.8);
             -webkit-appearance: none;
             -moz-appearance: textfield;
             margin: 0;
@@ -434,20 +409,18 @@
             background-color: #0f0f12;
         }
         #bpmInput:focus {
-            border-color: #9933ff; /* フォーカス時の枠線も紫に */
-            background-color: #0f0814; /* 液晶の奥のバックライトがほんのり紫に灯る演出 */
+            border-color: #9933ff;
+            background-color: #0f0814;
             box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.9), 0 0 10px rgba(153, 51, 255, 0.3);
             cursor: text;
         }
 
-        /* Google ChromeやEdge等のブラウザ用：スピンボタン（上下矢印）を完全に抹殺 */
         #bpmInput::-webkit-outer-spin-button,
         #bpmInput::-webkit-inner-spin-button {
             -webkit-appearance: none;
             margin: 0;
         }
         
-        /* 液晶ディスプレイ風のBPM表示窓 */
         .tap-display {
             width: 70px;
             height: 48px;
@@ -465,12 +438,11 @@
         }
         .tap-display span {
             font-size: 16px;
-            color: #444; /* 最初（未設定）は暗く沈ませる */
+            color: #444;
             margin-top: 2px;
             transition: color 0.1s;
         }
 
-        /* TAP専用のコンパクトなボタン */
         .btn.tap-btn {
             width: 70px;
             height: 48px;
@@ -484,7 +456,6 @@
             color: #fff;
         }
 
-        /* メトロノームボタンとLEDのスタイル */
         .btn.metro-btn {
             width: 80px;
             height: 48px;
@@ -497,27 +468,18 @@
             gap: 4px;
         }
         
-        /* 物理的なLEDランプを再現 */
         .metro-led {
             width: 8px;
             height: 8px;
-            background-color: #333; /* 消灯時はダークグレー */
+            background-color: #333;
             border-radius: 50%;
             transition: all 0.2s;
             box-shadow: inset 0 1px 2px rgba(0,0,0,0.5);
         }
         
-        /* メトロノームON時（待機中）のうっすらした点灯 */
-        .metro-led.on {
-            background-color: #990000; /* 鈍い赤 */
-        }
-        
-        /* 音が鳴った瞬間の強烈なフラッシュ（JSで制御） */
-        .metro-led.flash {
-            transform: scale(1.1);
-        }
+        .metro-led.on { background-color: #990000; }
+        .metro-led.flash { transform: scale(1.1); }
 
-        /* 履歴セレクトボックスのカスタムデザイン */
         #videoHistorySelect {
             padding: 10px;
             font-size: 13px;
@@ -528,14 +490,11 @@
             border-radius: 4px;
             cursor: pointer;
             outline: none;
-            max-width: 300px; /* ★ 幅の制限を2倍に拡張！ */
+            max-width: 300px;
             box-shadow: inset 0 2px 4px rgba(0,0,0,0.8);
             transition: border-color 0.2s;
         }
-        #videoHistorySelect:hover {
-            border-color: #444450;
-        }
-        /* ドロップダウンを開いた時の中身の選択肢 */
+        #videoHistorySelect:hover { border-color: #444450; }
         #videoHistorySelect option {
             background-color: #1a1a1e;
             color: #fff;
@@ -549,64 +508,81 @@
         <select id="videoHistorySelect" onchange="loadVideoFromHistory()">
             <option value="">-- HISTORY --</option>
         </select>
-        <button class="btn" onclick="loadVideo()">LOAD</button>
+        <button class="btn" style="width: auto; height: auto;" onclick="loadVideo()">LOAD</button>
     </div>
 
-    <!-- YouTubeプレイヤー ＆ カメラモニター統合エリア -->
+    <!-- YouTubeプレイヤー ＆ カメラモニター メインエリア -->
     <div class="stage-wrapper">
-        <div class="video-container">
-            <div id="player"></div>
-            <div id="noVideoMsg" class="no-video-message">NO VIDEO LOADED</div>
-        </div>
-        <div class="camera-container" onclick="initCamera()">
-            <video id="webcam" autoplay playsinline muted></video>
-            <div class="camera-overlay" id="cameraOverlay">📷 CLICK TO<br>START CAMERA</div>
-        </div>
-    </div>
+        
+        <!-- 左側：動画 ＋ 動画コントロール -->
+        <div class="stage-column video-column">
+            <div class="video-container">
+                <div id="player"></div>
+                <div id="noVideoMsg" class="no-video-message">NO VIDEO LOADED</div>
+            </div>
+            
+            <!-- 動画側コントロール（グレー下地なし、センター合わせ） -->
+            <div class="controls">
+                <button class="btn btn-blue" onclick="skip(-10)">-10 sec</button>
+                <button class="btn btn-blue" id="playPauseBtn" onclick="togglePlay()">Play / Pause</button>
+                <button class="btn btn-blue" onclick="skip(10)">+10 sec</button>
 
-    <div class="controls">
-        <button class="btn btn-blue" onclick="skip(-10)">-10 sec</button>
-        <button class="btn btn-blue" id="playPauseBtn" onclick="togglePlay()">Play / Pause</button>
-        <button class="btn btn-blue" onclick="skip(10)">+10 sec</button>
+                <div class="speed-panel">
+                    <div class="speed-display" id="speedDisplay">
+                        SPEED
+                        <div class="speed-reel" id="speedReel">
+                            <div class="speed-reel-item default-speed active">1.0x</div>
+                            <div class="speed-reel-item">0.75x</div>
+                            <div class="speed-reel-item">0.5x</div>
+                        </div>
+                    </div>
+                    <div class="speed-buttons">
+                        <button class="btn speed-btn" style="height: 48px;" onclick="toggleSpeed()">SPEED</button>
+                    </div>
+                </div>
+                
+                <button class="btn ab-btn" id="btnA" 
+                        onmousedown="startPress('A')" 
+                        onmouseup="endPress('A')" 
+                        onmouseleave="cancelPress('A')"
+                        ontouchstart="startPress('A')" 
+                        ontouchend="endPress('A')">A<br><span class="btn-status" style="color: #666;">--:--</span></button>
+                        
+                <button class="btn ab-btn" id="btnB" 
+                        onmousedown="startPress('B')" 
+                        onmouseup="endPress('B')" 
+                        onmouseleave="cancelPress('B')"
+                        ontouchstart="startPress('B')" 
+                        ontouchend="endPress('B')">B<br><span class="btn-status" style="color: #666;">--:--</span></button>
 
-        <div class="speed-panel">
-            <div class="speed-display" id="speedDisplay">
-                SPEED
-                <div class="speed-reel" id="speedReel">
-                    <div class="speed-reel-item default-speed active">1.0x</div>
-                    <div class="speed-reel-item">0.75x</div>
-                    <div class="speed-reel-item">0.5x</div>
+                <div class="tap-panel">
+                    <button class="btn metro-btn" id="metroBtn" onclick="toggleMetronome()">
+                        METRO
+                        <span class="metro-led" id="metroLed"></span>
+                    </button>
+                    <input type="number" id="bpmInput" value="120" min="30" max="300" 
+                           oninput="applyBpmFromInput()" 
+                           onkeydown="handleBpmEnter(event)">
+                    <button class="btn tap-btn" id="tapBtn" onmousedown="tapBPM()">TAP</button>
                 </div>
             </div>
-            <div class="speed-buttons">
-                <button class="btn speed-btn" style="height: 48px;" onclick="toggleSpeed()">SPEED</button>
+        </div>
+
+        <!-- 右側：カメラ映像 ＋ カメラコントロール -->
+        <div class="stage-column camera-column">
+            <div class="camera-container">
+                <video id="webcam" autoplay playsinline muted></video>
+                <div class="camera-overlay" id="cameraOverlay">📷 CAMERA OFF</div>
+            </div>
+            
+            <!-- カメラ側コントロール（センター合わせ） -->
+            <div class="controls">
+                <button class="btn camera-btn" id="cameraToggleBtn" onclick="toggleCamera()">
+                    CAMERA<br><span class="btn-status" id="cameraStatusText" style="color: #666;">OFF</span>
+                </button>
             </div>
         </div>
-        
-        <button class="btn ab-btn" id="btnA" 
-                onmousedown="startPress('A')" 
-                onmouseup="endPress('A')" 
-                onmouseleave="cancelPress('A')"
-                ontouchstart="startPress('A')" 
-                ontouchend="endPress('A')">A<br><span class="btn-status" style="color: #666;">--:--</span></button>
-                
-        <button class="btn ab-btn" id="btnB" 
-                onmousedown="startPress('B')" 
-                onmouseup="endPress('B')" 
-                onmouseleave="cancelPress('B')"
-                ontouchstart="startPress('B')" 
-                ontouchend="endPress('B')">B<br><span class="btn-status" style="color: #666;">--:--</span></button>
 
-        <div class="tap-panel">
-            <button class="btn metro-btn" id="metroBtn" onclick="toggleMetronome()">
-                METRO
-                <span class="metro-led" id="metroLed"></span>
-            </button>
-            <input type="number" id="bpmInput" value="120" min="30" max="300" 
-                   oninput="applyBpmFromInput()" 
-                   onkeydown="handleBpmEnter(event)">
-            <button class="btn tap-btn" id="tapBtn" onmousedown="tapBPM()">TAP</button>
-        </div>
     </div>
 
     <script>
@@ -628,9 +604,11 @@
         // 長押し判定用の変数
         var pressTimer = null;
         var isLongPress = false;
-        var longPressDuration = 500; // 長押しと判定する時間（ミリ秒、0.5秒）
+        var longPressDuration = 500;
 
-        // 初期表示時はデフォルト動画なしで初期化
+        // カメラ制御用の変数
+        var cameraStream = null;
+
         function onYouTubeIframeAPIReady() {
             player = new YT.Player('player', {
                 playerVars: {
@@ -644,22 +622,39 @@
             });
         }
 
-        // Webカメラ起動処理
-        async function initCamera() {
+        // Webカメラ起動 / 停止のトグル切り替え処理
+        async function toggleCamera() {
             var videoElem = document.getElementById('webcam');
             var overlayElem = document.getElementById('cameraOverlay');
-            
-            try {
-                var stream = await navigator.mediaDevices.getUserMedia({ 
-                    video: { width: { ideal: 720 }, height: { ideal: 1280 } }, 
-                    audio: false 
-                });
-                videoElem.srcObject = stream;
-                videoElem.style.display = 'block';
-                overlayElem.style.display = 'none';
-            } catch (err) {
-                alert('Webカメラへのアクセスが拒否されたか、カメラが見つかりませんでした。');
-                console.error(err);
+            var btnElem = document.getElementById('cameraToggleBtn');
+            var statusElem = document.getElementById('cameraStatusText');
+
+            if (cameraStream) {
+                // カメラをオフにする処理
+                cameraStream.getTracks().forEach(function(track) { track.stop(); });
+                cameraStream = null;
+                videoElem.style.display = 'none';
+                overlayElem.style.display = 'block';
+                btnElem.classList.remove('active');
+                statusElem.textContent = 'OFF';
+                statusElem.style.color = '#666';
+            } else {
+                // カメラをオンにする処理
+                try {
+                    cameraStream = await navigator.mediaDevices.getUserMedia({ 
+                        video: { width: { ideal: 720 }, height: { ideal: 1280 } }, 
+                        audio: false 
+                    });
+                    videoElem.srcObject = cameraStream;
+                    videoElem.style.display = 'block';
+                    overlayElem.style.display = 'none';
+                    btnElem.classList.add('active');
+                    statusElem.textContent = 'ON';
+                    statusElem.style.color = '#00ffcc';
+                } catch (err) {
+                    alert('Webカメラへのアクセスが拒否されたか、カメラが見つかりませんでした。');
+                    console.error(err);
+                }
             }
         }
 
@@ -685,8 +680,7 @@
             player.seekTo(newTime, true);
         }
 
-        // --- YouTubeロード ＆ タイトル付き履歴保存ロジック ---
-        var videoHistory = []; // { id: 'xxx', title: 'xxx' } の形で保存します
+        var videoHistory = [];
         var MAX_HISTORY = 8;
 
         function loadVideo() {
@@ -696,17 +690,13 @@
             var videoId = extractVideoId(input);
             
             if (videoId && player && typeof player.loadVideoById === 'function') {
-                currentVideoId = videoId; // 確実に現在のIDを追従させる
+                currentVideoId = videoId;
                 player.loadVideoById(videoId);
-                document.getElementById('noVideoMsg').style.display = 'none'; // メッセージを隠す
+                document.getElementById('noVideoMsg').style.display = 'none';
                 resetLoopSettings();
             } else {
                 alert('有効なYouTubeのURLまたは動画IDが見つかりませんでした。');
             }
-        }
-
-        function changeVideo() {
-            loadVideo();
         }
 
         function extractVideoId(url) {
@@ -715,16 +705,12 @@
             return (match && match[2].length == 11) ? match[2] : url;
         }
 
-        // 履歴に動画IDとタイトルを保存する関数
         function saveToHistory(id, title) {
             if (!id) return;
-            // タイトルが空、またはIDと同じだった場合は、見栄えのために「Loading...」または仮タイトルにする
             var finalTitle = (title && title !== id) ? title : "YouTube Video (" + id + ")";
 
-            // すでに同じIDが履歴にある場合は、一旦リストから削除（重複防止）
             for (var i = 0; i < videoHistory.length; i++) {
                 if (videoHistory[i].id === id) {
-                    // もし既存のタイトルがしっかり入っていて、新しいタイトルが仮タイトルの場合は上書きしない
                     if (finalTitle.indexOf("YouTube Video") === 0 && videoHistory[i].title.indexOf("YouTube Video") !== 0) {
                         finalTitle = videoHistory[i].title;
                     }
@@ -733,22 +719,13 @@
                 }
             }
             
-            // 先頭に最新のオブジェクトを追加
             videoHistory.unshift({ id: id, title: finalTitle });
+            if (videoHistory.length > MAX_HISTORY) videoHistory.pop();
             
-            // 最大件数を超えたら古いものを削除
-            if (videoHistory.length > MAX_HISTORY) {
-                videoHistory.pop();
-            }
-            
-            // ストレージに保存
             localStorage.setItem('yt_lesson_history', JSON.stringify(videoHistory));
-            
-            // 画面のドロップダウンを即座に更新
             updateHistorySelect();
         }
 
-        // 履歴ドロップダウンの表示を更新する関数
         function updateHistorySelect() {
             var select = document.getElementById('videoHistorySelect');
             if (!select) return;
@@ -768,12 +745,11 @@
                 select.appendChild(option);
             }
 
-            // ★【追加】履歴が1件以上ある場合、メニューの最下部に全削除用のスイッチを仕込む
             if (videoHistory.length > 0) {
                 var clearOption = document.createElement('option');
                 clearOption.value = "__CLEAR_ALL__";
                 clearOption.textContent = "❌ CLEAR ALL HISTORY";
-                clearOption.style.color = "#ff3333"; // ドロップダウンを開いた時に赤文字で目立たせる
+                clearOption.style.color = "#ff3333";
                 select.appendChild(clearOption);
             }
         }
@@ -782,15 +758,14 @@
             var select = document.getElementById('videoHistorySelect');
             var selectedId = select.value;
             
-            // ★【追加】全削除スイッチが選択された場合の消去処理
             if (selectedId === "__CLEAR_ALL__") {
                 if (confirm('すべての視聴履歴を削除しますか？')) {
-                    videoHistory = []; // 配列を空にする
-                    localStorage.removeItem('yt_lesson_history'); // PCの保存データを消去
-                    updateHistorySelect(); // ドロップダウンを初期状態に戻す
-                    document.getElementById('videoIdInput').value = ''; // 入力欄もクリア
+                    videoHistory = [];
+                    localStorage.removeItem('yt_lesson_history');
+                    updateHistorySelect();
+                    document.getElementById('videoIdInput').value = '';
                 } else {
-                    select.value = ""; // キャンセルした場合は選択を一番上に戻す
+                    select.value = "";
                 }
                 return;
             }
@@ -801,104 +776,62 @@
             }
         }
 
-        // プレーヤーの状態が変更されたときに呼び出される関数
         function onPlayerStateChange(event) {
-            // ★【超重要ガード】カウントイン中は、YouTubeの状態変化によるタイマー再起動を完全にスルーする
             if (isCountingIn) return;
 
             if (event.data == YT.PlayerState.PLAYING) {
-                // ★ 再生が始まったら確実にプレイヤーから動画データを取得
                 if (player && typeof player.getVideoData === 'function') {
                     var videoData = player.getVideoData();
                     var targetId = videoData.video_id || currentVideoId;
                     var targetTitle = videoData.title || targetId;
                     
-                    if (targetId) {
-                        saveToHistory(targetId, targetTitle);
-                    }
+                    if (targetId) saveToHistory(targetId, targetTitle);
                 }
-                // 再生が開始されたらループチェックをスタート（A点、B点が設定されていれば動く）
                 startLoopCheck();
             } else if (event.data == YT.PlayerState.PAUSED || event.data == YT.PlayerState.ENDED) {
-                // 一時停止または終了したら、一旦ループチェックを停止する
-                // ただし、A-B点が設定されている場合は停止させないように安全処理
-                if (pointA === null || pointB === null) {
-                    stopLoopCheck();
-                }
+                if (pointA === null || pointB === null) stopLoopCheck();
             }
         }
 
-        // --- A/Bボタンの長押し・クリック制御 ---
-
-        // ボタンが押された時
         function startPress(type) {
             isLongPress = false;
-            // 0.5秒後に長押し処理を実行するタイマーをセット
             pressTimer = setTimeout(function() {
                 isLongPress = true;
                 clearPoint(type);
             }, longPressDuration);
         }
 
-        // ボタンが離された時
         function endPress(type) {
-            // ★【追記】もし押された形跡（タイマー）がなければ、離された処理を完全に無視する
             if (!pressTimer) return; 
-
-            clearTimeout(pressTimer); // タイマーを解除
-            pressTimer = null;        // タイマーを完全に空にする（重要）
-            
-            // 長押し判定になっていなければ、通常のクリック処理
-            if (!isLongPress) {
-                handleButtonClick(type);
-            }
-        }
-
-        // マウスがボタンの外に出てしまったらタイマーをキャンセル
-        function cancelPress(type) {
             clearTimeout(pressTimer);
+            pressTimer = null;
+            
+            if (!isLongPress) handleButtonClick(type);
         }
 
-        // 通常クリック時の挙動
-        // --- 補正機能付き：A/Bボタンクリック時の処理 ---
+        function cancelPress(type) { clearTimeout(pressTimer); }
+
         function handleButtonClick(type) {
             if (!player || typeof player.getCurrentTime !== 'function') return;
 
             var val = (type === 'A') ? pointA : pointB;
 
             if (val === null) {
-                // 現在の動画の再生時間を取得
                 var rawTime = player.getCurrentTime();
-                
-                // ★【ここがポイント：タイムラグ補正】
-                // ボタンを押したタイミングより「0.18秒」手前の時間を記録する
                 var correctedTime = rawTime - 0.18;
-                
-                // マイナス秒（動画の開始前）になってしまわないように、0秒未満は0秒に固定する
-                if (correctedTime < 0) {
-                    correctedTime = 0;
-                }
+                if (correctedTime < 0) correctedTime = 0;
 
-                // 補正した時間を変数に代入
-                if (type === 'A') {
-                    pointA = correctedTime;
-                } else {
-                    pointB = correctedTime;
-                }
+                if (type === 'A') pointA = correctedTime;
+                else pointB = correctedTime;
                 
                 updateButtonUI(type);
 
-                // A点とB点が揃ったら自動でループチェックを開始
-                if (pointA !== null && pointB !== null) {
-                    startLoopCheck();
-                }
+                if (pointA !== null && pointB !== null) startLoopCheck();
             } else {
-                // すでに設定されている場合は、その時間へジャンプ
                 player.seekTo(val, true);
             }
         }
 
-        // 長押し時のクリア処理
         function clearPoint(type) {
             if (type === 'A') {
                 pointA = null;
@@ -909,30 +842,25 @@
             }
         }
 
-        // A/Bボタンのテキストと見た目を更新
         function updateButtonUI(type) {
             var btn = document.getElementById('btn' + type);
             var val = (type === 'A') ? pointA : pointB;
         
             if (val === null) {
-                // 未設定時は下段を少し暗いグレーに
                 btn.innerHTML = type + "<br><span class='btn-status' style='color: #666;'>--:--</span>";
                 btn.classList.remove('active');
             } else {
-                // 設定時は下段がネオンカラー（#00ffcc）で目立つように
                 btn.innerHTML = type + "<br><span class='btn-status' style='color: #00ffcc; font-weight: bold; font-size: 14px;'>" + formatTime(val) + "</span>";
                 btn.classList.add('active');
             }
         }
 
-        // 秒数を「分:秒」に変換
         function formatTime(seconds) {
             var m = Math.floor(seconds / 60);
             var s = Math.floor(seconds % 60);
             return m + ":" + (s < 10 ? "0" : "") + s;
         }
 
-        // --- 3秒フェードアウト ➔ 3秒前ジャンプ ➔ 3秒フェードイン付きループ監視（ピコ音追加） ---
         var isLoopSequence = false; 
 
         function startLoopCheck() {
@@ -949,16 +877,11 @@
                     
                     if (currentTime >= 0 && currentTime >= pointB) {
                         isLoopSequence = true; 
-                        
-                        // ★【ここを追加】B点に達したまさにその瞬間に「ピコッ」と鳴らす
                         playPikoSound();
                         
-                        // そのまま3秒間のフェードアウトへ移行
                         startFadeOut(function() {
                             var preRollTime = pointA - 3;
-                            if (preRollTime < 0) {
-                                preRollTime = 0;
-                            }
+                            if (preRollTime < 0) preRollTime = 0;
                             player.seekTo(preRollTime, true);
                             
                             player.setVolume(0);
@@ -971,14 +894,12 @@
             }, 100);
         }
 
-        // --- 音を滑らかにフェードアウトさせる関数 ---
         function startFadeOut(callback) {
-            var currentVolume = 100; // 現在の音量（最大）
-            var duration = 1000;    // 3秒かけてフェードアウト
-            var intervalTime = 50;  // 50ミリ秒ごとに音量を更新
-            var step = currentVolume / (duration / intervalTime); // 1回あたりの音量減少量
-
-            var pElement = document.getElementById('player'); // ★動画要素を取得
+            var currentVolume = 100;
+            var duration = 1000;
+            var intervalTime = 50;
+            var step = currentVolume / (duration / intervalTime);
+            var pElement = document.getElementById('player');
             
             var fadeOutTimer = setInterval(function() {
                 if (!player || typeof player.setVolume !== 'function') {
@@ -990,25 +911,23 @@
                 currentVolume -= step;
                 if (currentVolume <= 0) {
                     player.setVolume(0);
-                    if (pElement) pElement.style.opacity = 0; // ★画面を完全に真っ暗にする
+                    if (pElement) pElement.style.opacity = 0;
                     clearInterval(fadeOutTimer);
-                    if (callback) callback(); // フェードアウト完了後に巻き戻しを実行
+                    if (callback) callback();
                 } else {
                     player.setVolume(Math.round(currentVolume));
-                    if (pElement) pElement.style.opacity = (currentVolume / 100); // ★画面もじわじわ暗く
+                    if (pElement) pElement.style.opacity = (currentVolume / 100);
                 }
             }, intervalTime);
         }
 
-        // --- 音を滑らかにフェードインさせる関数 ---
         function startFadeIn(callback) {
-            var targetVolume = 100; // 最終的な音量（最大）
+            var targetVolume = 100;
             var currentVolume = 0;
-            var duration = 2000;   // 3秒かけてフェードイン
-            var intervalTime = 50; // 50ミリ秒ごとに音量を更新
-            var step = targetVolume / (duration / intervalTime); // 1回あたりの音量増加量
-
-            var pElement = document.getElementById('player'); // ★動画要素を取得
+            var duration = 2000;
+            var intervalTime = 50;
+            var step = targetVolume / (duration / intervalTime);
+            var pElement = document.getElementById('player');
             
             var fadeInTimer = setInterval(function() {
                 if (!player || typeof player.setVolume !== 'function') {
@@ -1020,25 +939,19 @@
                 currentVolume += step;
                 if (currentVolume >= targetVolume) {
                     player.setVolume(targetVolume);
-                    if (pElement) pElement.style.opacity = 1; // ★画面を完全に100%表示にする
+                    if (pElement) pElement.style.opacity = 1;
                     clearInterval(fadeInTimer);
-                    if (callback) callback(); // 全工程終了
+                    if (callback) callback();
                 } else {
                     player.setVolume(Math.round(currentVolume));
-                    if (pElement) pElement.style.opacity = (currentVolume / 100); // ★画面もじわじわ明るく
+                    if (pElement) pElement.style.opacity = (currentVolume / 100);
                 }
             }, intervalTime);
         }
 
-        // --- ループ折り返し時の「ピコッ」という電子音を作る関数 ---
         function playPikoSound() {
-            // AudioContextが初期化されていない場合は作成
-            if (!audioCtx) {
-                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-            }
-            if (audioCtx.state === 'suspended') {
-                audioCtx.resume();
-            }
+            if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            if (audioCtx.state === 'suspended') audioCtx.resume();
 
             var now = audioCtx.currentTime;
             var osc = audioCtx.createOscillator();
@@ -1047,15 +960,11 @@
             osc.connect(gainNode);
             gainNode.connect(audioCtx.destination);
 
-            // 音色の設定（四角波 'square' や 三角波 'triangle' にするとレトロゲーム風になります。ここではクリアな 'sine'）
             osc.type = 'sine';
-
-            // 「ピ（1200Hz）」から「コ（1500Hz）」へ高速にピッチを跳ね上げる（ピコッ感を出す）
             osc.frequency.setValueAtTime(1200, now);
             osc.frequency.setValueAtTime(1500, now + 0.04);
 
-            // 音量の設定（0.08秒で一瞬で消えるようにして、歯切れの良さを出す）
-            gainNode.gain.setValueAtTime(0.15, now); // 音量
+            gainNode.gain.setValueAtTime(0.15, now);
             gainNode.gain.exponentialRampToValueAtTime(0.001, now + 0.08);
 
             osc.start(now);
@@ -1077,151 +986,89 @@
             stopLoopCheck();
         }
 
-        // --- 再生速度コントロールのロジック（通常 -> 0.75 -> 0.5 ループ仕様） ---
         var speedRates = [1.0, 0.75, 0.5];
-        var currentSpeedIndex = 0; // 初期値は 1.0x
+        var currentSpeedIndex = 0;
 
-        // ボタンを押した時のループ切り替え関数
         function toggleSpeed() {
             if (!player || typeof player.setPlaybackRate !== 'function') return;
-
-            // 次の速度へ（配列の最後までいったら0に戻る）
             currentSpeedIndex = (currentSpeedIndex + 1) % speedRates.length;
-            
             applySpeed();
         }
 
-        // キーボード操作（上下矢印）でも連動できるようにする互換用関数
-        function changeSpeed(direction) {
-            if (!player || typeof player.setPlaybackRate !== 'function') return;
-            
-            // 上矢印なら前の速度、下矢印なら次の速度へ
-            if (direction > 0) {
-                currentSpeedIndex = (currentSpeedIndex - 1 + speedRates.length) % speedRates.length;
-            } else {
-                currentSpeedIndex = (currentSpeedIndex + 1) % speedRates.length;
-            }
-            
-            applySpeed();
-        }
-
-        // 実際にYouTubeとディスプレイ画面に速度を適用する処理（選択値以外フェードアウト仕様）
         function applySpeed() {
             var targetSpeed = speedRates[currentSpeedIndex];
             player.setPlaybackRate(targetSpeed);
 
-            // リール全体を上にスライドさせる
             var reel = document.getElementById('speedReel');
             if (reel) {
                 var offset = currentSpeedIndex * 24;
                 reel.style.transform = 'translateY(-' + offset + 'px)';
 
-                // ★【追加】リール内のすべてのアイテムを取得
                 var items = reel.getElementsByClassName('speed-reel-item');
                 for (var i = 0; i < items.length; i++) {
-                    if (i === currentSpeedIndex) {
-                        // 現在選ばれている数字だけに active をつけてフェードイン
-                        items[i].classList.add('active');
-                    } else {
-                        // それ以外の数字からは active を外してフェードアウト
-                        items[i].classList.remove('active');
-                    }
+                    if (i === currentSpeedIndex) items[i].classList.add('active');
+                    else items[i].classList.remove('active');
                 }
             }
         }
         
-        // キーボードからBPM数値が入力された瞬間にリアルタイム反映する関数
         function applyBpmFromInput() {
             var val = parseInt(document.getElementById('bpmInput').value);
             if (val >= 30 && val <= 300) {
-                // メトロノームが読み込んでいるBPM表示窓の数値を書き換える
-                var bpmSpan = document.querySelector('#bpmDisplay span');
-                if (bpmSpan) {
-                    bpmSpan.textContent = val;
-                    bpmSpan.style.color = '#ff3b30'; // TAP時と同じネオンカラーに
-                    bpmSpan.style.textShadow = '0 0 8px rgba(255,59,48,0.6)';
-                }
-                
-                // メトロノームが動作中の場合、次の拍のタイミングを新しいBPMで即座に再計算する
-                if (isMetroPlaying && audioCtx) {
-                    // 次に鳴るクリック音の時間を現在の時間にリセットしてテンポ変化のラグをなくす
-                    nextNoteTime = audioCtx.currentTime; 
-                }
+                if (isMetroPlaying && audioCtx) nextNoteTime = audioCtx.currentTime; 
             }
         }
 
-        // Enterキーが押されたら入力欄のフォーカスを外してギター演奏に戻るための関数
         function handleBpmEnter(event) {
             if (event.key === 'Enter') {
                 event.preventDefault();
-                document.getElementById('bpmInput').blur(); // 入力欄のフォーカスを解除
+                document.getElementById('bpmInput').blur();
             }
         }
         
-        // --- TAP BPM コントロールのロジック ---
         var tapTimes = [];
-        var tapTimeoutTimer = null;
 
         function tapBPM() {
             var now = Date.now();
 
-            // 前回のタップから3秒以上空いたら、新しい曲の計測とみなしてリセット
             if (tapTimes.length > 0 && (now - tapTimes[tapTimes.length - 1] > 3000)) {
                 tapTimes = [];
             }
 
             tapTimes.push(now);
 
-            // 2回以上タップされたらBPMを計算
             if (tapTimes.length > 1) {
-                // タップ間のすべての間隔（ミリ秒）を計算して平均を出す
                 var intervals = [];
                 for (var i = 1; i < tapTimes.length; i++) {
                     intervals.push(tapTimes[i] - tapTimes[i - 1]);
                 }
                 
                 var avgInterval = intervals.reduce(function(a, b) { return a + b; }) / intervals.length;
-                
-                // ミリ秒からBPMに変換 (60000ms / 平均間隔)
                 var calculatedBpm = Math.round(60000 / avgInterval);
 
                 if (calculatedBpm >= 30 && calculatedBpm <= 300) {
-                    bpm = calculatedBpm;
-                    // ★【共通化】入力欄の数値を直接書き換えます
-                    document.getElementById('bpmInput').value = bpm;
-                    
-                    // メトロノーム動作中なら即座にテンポを同期
-                    if (isMetroPlaying && audioCtx) {
-                        nextNoteTime = audioCtx.currentTime;
-                    }
+                    document.getElementById('bpmInput').value = calculatedBpm;
+                    if (isMetroPlaying && audioCtx) nextNoteTime = audioCtx.currentTime;
                 }
             }
 
-            // 視覚的なフィードバック：タップした瞬間にボタンを一瞬フラッシュさせる
             var tapBtn = document.getElementById('tapBtn');
             tapBtn.style.background = 'linear-gradient(180deg, #555 0%, #333 100%)';
-            setTimeout(function() {
-                tapBtn.style.background = ''; // 元のCSSに戻す
-            }, 50);
+            setTimeout(function() { tapBtn.style.background = ''; }, 50);
         }
 
-        // --- メトロノームのロジック ---
         var audioCtx = null;
         var metroTimer = null;
         var isMetroPlaying = false;
         var currentBeat = 0;
-        var nextNoteTime = 0.0; // 次の音が鳴るべき絶対時間（秒）
-        var scheduleAheadTime = 0.1; // どれくらい未来までスケジュールするか（秒）
-        var lookahead = 25.0; // 次のチェックまでの間隔（ミリ秒）
+        var nextNoteTime = 0.0;
+        var scheduleAheadTime = 0.1;
+        var lookahead = 25.0;
 
         function toggleMetronome() {
-            // 最初の一歩でオーディオコンテキストを初期化（ブラウザのセキュリティ対策）
-            if (!audioCtx) {
-                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-            }
+            if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
 
             if (pointA === null && pointB === null && (!player || typeof player.getPlayerState !== 'function' || player.getPlayerState() !== YT.PlayerState.PLAYING)) {
-                // 音声再生の有効化のため一度動かす
                 if (audioCtx.state === 'suspended') audioCtx.resume();
             }
 
@@ -1230,24 +1077,21 @@
             var btn = document.getElementById('metroBtn');
 
             if (isMetroPlaying) {
-                // ★ 共通化した入力欄から現在のBPMを取得
                 var currentBPM = parseInt(document.getElementById('bpmInput').value);
                 if (isNaN(currentBPM) || currentBPM < 30 || currentBPM > 300) {
                     currentBPM = 120;
                     document.getElementById('bpmInput').value = 120;
                 }
-                bpm = currentBPM;
 
                 currentBeat = 0;
                 nextNoteTime = audioCtx.currentTime + 0.05;
-                scheduler(); // スケジューラ開始
+                scheduler();
                 
                 led.classList.add('on');
                 btn.style.borderColor = '#9933ff';
             } else {
                 if (metroTimer) clearTimeout(metroTimer);
                 
-                // ★【ここを追記】手動停止時も予約された音をクリア
                 activeOscillators.forEach(function(activeOsc) {
                     try { activeOsc.stop(); } catch(e) {}
                 });
@@ -1259,7 +1103,6 @@
             }
         }
 
-        // 高精度タイマーのためのスケジューラー（バックグラウンドでのズレを防ぐ仕組み）
         function scheduler() {
             while (nextNoteTime < audioCtx.currentTime + scheduleAheadTime) {
                 scheduleNote(currentBeat, nextNoteTime);
@@ -1269,19 +1112,15 @@
         }
 
         function advanceNote() {
-            // ★ 共通化した入力欄から現在のBPMを取得
             var currentBPM = parseInt(document.getElementById('bpmInput').value) || 120;
             var secondsPerBeat = 60.0 / currentBPM;
-            nextNoteTime += secondsPerBeat; // 次の拍の時間を計算
-
-            currentBeat = (currentBeat + 1) % 4; // 4拍子ループ
+            nextNoteTime += secondsPerBeat;
+            currentBeat = (currentBeat + 1) % 4;
         }
 
-        // カウントイン中に鳴った拍数を数える変数と、発振器を記録する配列
         var countInBeats = 0; 
-        var activeOscillators = []; // 先読みされた発振器を溜めておく配列
+        var activeOscillators = [];
 
-        // 実際に電子音を作る関数
         function scheduleNote(beatNumber, time) {
             if (!isMetroPlaying) return;
 
@@ -1290,76 +1129,63 @@
             osc.connect(gainNode);
             gainNode.connect(audioCtx.destination);
 
-            // 1拍目は高音(880Hz)、2,3,4拍子は低音(440Hz)
             if (beatNumber === 0) {
                 osc.frequency.setValueAtTime(880, time);
             } else {
                 osc.frequency.setValueAtTime(440, time);
             }
 
-            // 音の長さ（歯切れの良い0.05秒のクリック音）
-            gainNode.gain.setValueAtTime(0.3, time); // 音量
+            gainNode.gain.setValueAtTime(0.3, time);
             gainNode.gain.exponentialRampToValueAtTime(0.001, time + 0.05);
 
             osc.start(time);
             osc.stop(time + 0.06);
 
-            // ★【重要】生成した発振器を配列に記録しておく（後で強制停止できるようにするため）
             activeOscillators.push(osc);
 
-            // 視覚的フィードバック：音に合わせてLEDを一瞬光らせる
             setTimeout(function() {
                 var led = document.getElementById('metroLed');
                 if (led && isMetroPlaying) {
                     led.classList.add('flash');
                     if (beatNumber === 0) {
-                        led.style.background = '#ff3b30'; // 1拍目は赤
+                        led.style.background = '#ff3b30';
                         led.style.boxShadow = '0 0 10px #ff3b30';
                     } else {
-                        led.style.background = '#00ffcc'; // 2,3,4拍目は緑
+                        led.style.background = '#00ffcc';
                         led.style.boxShadow = '0 0 10px #00ffcc';
                     }
                     setTimeout(function() {
                         led.classList.remove('flash');
                         if (isMetroPlaying) {
-                            led.style.background = '#990000'; // 待機状態の暗い赤
+                            led.style.background = '#990000';
                             led.style.boxShadow = 'none';
                         }
                     }, 40);
                 }
             }, (time - audioCtx.currentTime) * 1000);
 
-            // カウントイン中の場合、拍数を正確に4回数えてから動画を再生する
             if (isCountingIn) {
-                countInBeats++; // 鳴った拍数をインクリメント
+                countInBeats++;
                 
-                // 4拍（1、2、3、4）鳴り終わった瞬間のタイミングを計算
                 if (countInBeats === 9) {
                     var playDelay = (time - audioCtx.currentTime) * 1000;
                     
-                    // 次の小節の頭（5拍目の直前）で正確に動画をリスタート
                     setTimeout(function() {
                         if (isCountingIn) {
-                            isCountingIn = false; // カウントイン終了
-                            countInBeats = 0;     // カウンターをリセット
+                            isCountingIn = false;
+                            countInBeats = 0;
                             
-                            // ★【ここが確実なバグ修正】
-                            // 先読みでブラウザに予約されてしまった未来の「ぴ」の音をすべて物理的に破壊・消去する
                             activeOscillators.forEach(function(activeOsc) {
-                                try {
-                                    activeOsc.stop(); // 鳴る予定の音を強制停止
-                                } catch(e) {}
+                                try { activeOsc.stop(); } catch(e) {}
                             });
-                            activeOscillators = []; // 配列を空にする
+                            activeOscillators = [];
 
-                            // タイマーをクリアしてメトロノームを完全OFFにする
                             if (metroTimer) {
                                 clearTimeout(metroTimer);
                                 metroTimer = null;
                             }
                             isMetroPlaying = false;
 
-                            // LEDとボタンの外観を完全消灯にリセット
                             var led = document.getElementById('metroLed');
                             var btn = document.getElementById('metroBtn');
                             if (led) {
@@ -1370,10 +1196,8 @@
                             }
                             if (btn) btn.style.borderColor = '';
                             
-                            // 次回復帰時は綺麗な1拍目（beatNumber=0）から予約させる
                             currentBeat = 0; 
                             
-                            // 動画の再生を開始
                             if (player && typeof player.playVideo === 'function') {
                                 player.playVideo();
                             }
@@ -1383,92 +1207,73 @@
             }
         }
 
-        // --- キーボード操作の制御 ---
         window.addEventListener('keydown', function(event) {
-            // URL入力欄（input）にフォーカスがある場合は、キーボードショートカットを無効化する
-            if (document.activeElement.tagName === 'INPUT') {
-                return;
-            }
-
+            if (document.activeElement.tagName === 'INPUT') return;
             if (event.repeat) return;
             
             switch (event.key) {
-                case ' ': // スペースキー
-                    event.preventDefault(); // 画面のスクロールを防止
+                case ' ':
+                    event.preventDefault();
                     togglePlay();
                     break;
-                    
-                case 'ArrowLeft': // 左矢印キー
+                case 'ArrowLeft':
                     event.preventDefault();
                     skip(-10);
                     break;
-                    
-                case 'ArrowRight': // 右矢印キー
+                case 'ArrowRight':
                     event.preventDefault();
                     skip(10);
                     break;
-
                 case 'a':
                 case 'A':
-                    if (!event.repeat && !pressTimer) { 
-                        startPress('A');
-                    }
+                    if (!event.repeat && !pressTimer) startPress('A');
                     break;
-
                 case 'b':
                 case 'B':
-                    if (!event.repeat && !pressTimer) { 
-                        startPress('B');
-                    }
+                    if (!event.repeat && !pressTimer) startPress('B');
                     break;
-
-                case 's': // Sキー
+                case 's':
                 case 'S':
                     toggleSpeed();
                     break;
-                    
-                case 't': // Tキー（小文字・大文字両対応）
+                case 't':
                 case 'T':
                     tapBPM();
                     break;
-
-                case 'm': // Mキー（小文字・大文字両対応）
+                case 'm':
                 case 'M':
                     toggleMetronome();
                     break;
-                
+                case 'c':
+                case 'C':
+                    toggleCamera();
+                    break;
                 default:
-                    return; // その他のキーは何もしない
+                    return;
             }
         });
-        // ★【新規追記】キーボードやフットペダルを「離した瞬間」を検知するイベント
+
         window.addEventListener('keyup', function(event) {
-            if (document.activeElement.tagName === 'INPUT') {
-                return;
-            }
+            if (document.activeElement.tagName === 'INPUT') return;
         
             switch (event.key) {
                 case 'a':
                 case 'A':
-                    endPress('A'); // Aキーを離したら、短押し確定か長押し終了を判定
+                    endPress('A');
                     break;
-                    
                 case 'b':
                 case 'B':
-                    endPress('B'); // Bキーを離したら、短押し確定か長押し終了を判定
+                    endPress('B');
                     break;
             }
         });
-        // ページ読み込み時に実行する初期化処理（過去の履歴を復活）
+
         window.addEventListener('DOMContentLoaded', function() {
             var storedHistory = localStorage.getItem('yt_lesson_history');
             if (storedHistory) {
                 try {
                     videoHistory = JSON.parse(storedHistory);
-                    if (!Array.isArray(videoHistory)) {
-                        videoHistory = [];
-                    }
-                    // 古い形式（ただのID文字列の配列）が入っていた場合は、一旦クリアしてエラーを防ぐ
+                    if (!Array.isArray(videoHistory)) videoHistory = [];
                     if (videoHistory.length > 0 && typeof videoHistory[0] === 'string') {
                         videoHistory = [];
                         localStorage.removeItem('yt_lesson_history');
@@ -1477,7 +1282,6 @@
                     videoHistory = [];
                 }
             }
-            // 画面の履歴セレクトボックスに反映
             updateHistorySelect();
         });
     </script>
