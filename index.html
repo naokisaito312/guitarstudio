@@ -19,7 +19,8 @@
         /* 動画ID入力エリア（エフェクターのインプット風） */
         .input-container {
             margin-bottom: 25px;
-            width: 70vw;
+            width: 85vw;
+            max-width: 1200px;
             display: flex;
             gap: 10px;
             background: #1a1a1e;
@@ -27,6 +28,7 @@
             border-radius: 6px;
             border: 1px solid #2d2d34;
             box-shadow: inset 0 2px 5px rgba(0,0,0,0.5);
+            box-sizing: border-box;
         }
         .input-container input {
             flex: 1;
@@ -59,17 +61,40 @@
             background-color: #FF0000;
         }
         
+        /* プレイヤー＆Webカメラのレイアウト用統合ラッパー */
+        .stage-wrapper {
+            width: 85vw;
+            max-width: 1200px;
+            display: flex;
+            gap: 15px;
+            align-items: stretch;
+            margin-bottom: 10px;
+        }
+
         /* プレイヤーのラッパー（モニター画面風） */
         .video-container {
-            width: 70vw;
+            flex: 1; /* 横幅を柔軟に調整 */
+            aspect-ratio: 16 / 9; /* アスペクト比固定 */
             position: relative;
-            padding-top: calc(70vw * 9 / 16); 
-            max-height: 70vh;
             background-color: #000;
             box-shadow: 0 10px 30px rgba(0,0,0,0.7), 0 0 1px #00ffcc; /* 微かなネオンの反射 */
             border-radius: 8px;
             overflow: hidden;
             border: 4px solid #2d2d34; /* 頑丈な金属フレーム風 */
+            box-sizing: border-box;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        /* 初期動画なし状態のダミー表示 */
+        .no-video-message {
+            color: #555;
+            font-size: 16px;
+            font-weight: bold;
+            letter-spacing: 2px;
+            text-shadow: 0 0 5px rgba(0,0,0,0.8);
+            text-align: center;
         }
         
         #player, #player iframe {
@@ -80,10 +105,48 @@
             height: 100%;
             transition: opacity 0.05s linear;
         }
+
+        /* Webカメラプレビュー領域 */
+        .camera-container {
+            width: 200px; /* 縦長表示用サイズ */
+            background-color: #050507;
+            border: 4px solid #2d2d34;
+            border-radius: 8px;
+            overflow: hidden;
+            position: relative;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.7), 0 0 1px #00ffcc;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            box-sizing: border-box;
+        }
+
+        .camera-container video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover; /* 縦長枠いっぱいにトリミング表示 */
+            transform: scaleX(-1); /* 自撮り（鏡映し）モード */
+            display: none;
+        }
+
+        .camera-overlay {
+            color: #666;
+            font-size: 11px;
+            text-align: center;
+            padding: 10px;
+            user-select: none;
+            transition: color 0.2s;
+        }
+        .camera-container:hover .camera-overlay {
+            color: #00ffcc;
+        }
         
         /* エフェクターのコントロールパネル（シャーシ） */
         .controls {
-            margin-top: 25px;
+            margin-top: 15px;
+            width: 85vw;
+            max-width: 1200px;
             background: linear-gradient(180deg, #25252c 0%, #1a1a1e 100%); /* 金属のヘアラインを意識したグラデ */
             border: 2px solid #3a3a45;
             border-radius: 12px;
@@ -94,6 +157,7 @@
             align-items: center;
             flex-wrap: wrap;
             box-shadow: 0 8px 20px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.1);
+            box-sizing: border-box;
         }
         
         /* 共通ボタン（フットスイッチ・頑丈なメタルボタン風） */
@@ -477,8 +541,16 @@
         <button class="btn" onclick="loadVideo()">LOAD</button>
     </div>
 
-    <div class="video-container">
-        <div id="player"></div>
+    <!-- YouTubeプレイヤー ＆ カメラモニター統合エリア -->
+    <div class="stage-wrapper">
+        <div class="video-container">
+            <div id="player"></div>
+            <div id="noVideoMsg" class="no-video-message">NO VIDEO LOADED</div>
+        </div>
+        <div class="camera-container" onclick="initCamera()">
+            <video id="webcam" autoplay playsinline muted></video>
+            <div class="camera-overlay" id="cameraOverlay">📷 CLICK TO<br>START CAMERA</div>
+        </div>
     </div>
 
     <div class="controls">
@@ -533,7 +605,7 @@
         firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
 
         var player;
-        var defaultVideoId = 'dQw4w9WgXcQ'; 
+        var currentVideoId = null;
 
         // ループ制御用の変数
         var pointA = null;
@@ -547,9 +619,9 @@
         var isLongPress = false;
         var longPressDuration = 500; // 長押しと判定する時間（ミリ秒、0.5秒）
 
+        // 初期表示時はデフォルト動画なしで初期化
         function onYouTubeIframeAPIReady() {
             player = new YT.Player('player', {
-                videoId: defaultVideoId,
                 playerVars: {
                     'playsinline': 1,
                     'controls': 1,
@@ -559,6 +631,25 @@
                     'onStateChange': onPlayerStateChange
                 }
             });
+        }
+
+        // Webカメラ起動処理
+        async function initCamera() {
+            var videoElem = document.getElementById('webcam');
+            var overlayElem = document.getElementById('cameraOverlay');
+            
+            try {
+                var stream = await navigator.mediaDevices.getUserMedia({ 
+                    video: { width: { ideal: 720 }, height: { ideal: 1280 } }, 
+                    audio: false 
+                });
+                videoElem.srcObject = stream;
+                videoElem.style.display = 'block';
+                overlayElem.style.display = 'none';
+            } catch (err) {
+                alert('Webカメラへのアクセスが拒否されたか、カメラが見つかりませんでした。');
+                console.error(err);
+            }
         }
 
         function togglePlay() {
@@ -596,6 +687,7 @@
             if (videoId && player && typeof player.loadVideoById === 'function') {
                 currentVideoId = videoId; // 確実に現在のIDを追従させる
                 player.loadVideoById(videoId);
+                document.getElementById('noVideoMsg').style.display = 'none'; // メッセージを隠す
                 resetLoopSettings();
             } else {
                 alert('有効なYouTubeのURLまたは動画IDが見つかりませんでした。');
@@ -1102,27 +1194,6 @@
             }, 50);
         }
 
-        // キーボードからBPM数値が直接入力された瞬間にリアルタイム反映する関数
-        function applyBpmFromInput() {
-            var val = parseInt(document.getElementById('bpmInput').value);
-            if (val >= 30 && val <= 300) {
-                bpm = val; // 内部のBPM変数を更新
-                
-                // メトロノームが動作中の場合、次の拍のタイミングを新しいBPMで即座に再計算する
-                if (isMetroPlaying && audioCtx) {
-                    nextNoteTime = audioCtx.currentTime; 
-                }
-            }
-        }
-
-        // Enterキーが押されたら入力欄のフォーカスを外して演奏に戻るための関数
-        function handleBpmEnter(event) {
-            if (event.key === 'Enter') {
-                event.preventDefault();
-                document.getElementById('bpmInput').blur(); // 入力欄の選択を解除
-            }
-        }
-        
         // --- メトロノームのロジック ---
         var audioCtx = null;
         var metroTimer = null;
@@ -1301,8 +1372,6 @@
             }
         }
 
-        // TAP BPMが更新された時に、動的にメトロノームの速度も追従させるための処理
-        // 既存の tapBPM() 関数の最後のほう、bpmSpan.textContent = bpm; のすぐ下あたりに「if(isMetroPlaying) { /* 何もしなくてOK（自動追従します） */ }」となるよう、念のため既存のロジックと統合されています。
         // --- キーボード操作の制御 ---
         window.addEventListener('keydown', function(event) {
             // URL入力欄（input）にフォーカスがある場合は、キーボードショートカットを無効化する
