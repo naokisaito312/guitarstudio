@@ -25,7 +25,7 @@
             gap: 16px;
         }
         
-        /* ★URL入力エリア（フォントサイズ拡大） */
+        /* URL入力エリア（前回サイズ維持） */
         .input-container {
             width: 100%;
             display: flex;
@@ -40,7 +40,7 @@
         .input-container input {
             flex: 1;
             padding: 14px 20px;
-            font-size: 17px; /* 14px -> 17px */
+            font-size: 17px;
             font-weight: 500;
             background-color: #f8fafc;
             border: none;
@@ -55,7 +55,7 @@
         }
         .input-container button {
             padding: 14px 32px;
-            font-size: 17px; /* 14px -> 17px */
+            font-size: 17px;
             background-color: #4f46e5;
             color: #ffffff;
             border: none;
@@ -118,7 +118,7 @@
 
         .no-video-message {
             color: #64748b;
-            font-size: 18px; /* 16px -> 18px */
+            font-size: 18px;
             font-weight: 600;
             letter-spacing: 1px;
             text-align: center;
@@ -158,14 +158,14 @@
 
         .camera-overlay {
             color: #64748b;
-            font-size: 18px; /* 15px -> 18px */
+            font-size: 18px;
             font-weight: 600;
             text-align: center;
             padding: 10px;
             user-select: none;
         }
 
-        /* コントロールパネル */
+        /* ★コントロールパネル（拡大対応） */
         .controls {
             width: 100%;
             padding: 4px 0;
@@ -178,16 +178,16 @@
             flex-shrink: 0;
         }
         
-        /* ★共通ボタン（フォントサイズ拡大） */
+        /* ★共通ボタン（フォントサイズ・サイズ拡大） */
         .btn {
-            width: 140px;
-            height: 62px;
+            width: 150px;       /* 140px -> 150px */
+            height: 68px;      /* 62px -> 68px */
             padding: 0;
-            font-size: 16px; /* 13px -> 16px */
+            font-size: 18px;    /* 16px -> 18px */
             font-weight: 700;
             font-family: inherit;
             border: none;
-            border-radius: 14px;
+            border-radius: 16px;
             cursor: pointer;
             transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
             user-select: none;
@@ -205,7 +205,7 @@
             filter: brightness(1.08);
         }
         .btn-status {
-            font-size: 14px; /* 12px -> 14px */
+            font-size: 15px;    /* 14px -> 15px */
             margin-top: 3px;
             font-family: inherit;
         }
@@ -267,23 +267,23 @@
             display: flex;
             align-items: center;
             background: #ffffff;
-            padding: 5px 10px;
-            border-radius: 16px;
+            padding: 6px 12px;
+            border-radius: 18px;
             border: none;
-            gap: 10px;
+            gap: 12px;
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
         }
 
         .speed-display {
             background: #f1f5f9;
             padding: 4px 14px;
-            border-radius: 10px;
-            font-size: 12px; /* 10px -> 12px */
+            border-radius: 12px;
+            font-size: 13px;    /* 12px -> 13px */
             font-weight: 700;
             color: #64748b;
             text-align: center;
             border: none;
-            height: 48px;
+            height: 54px;       /* 48px -> 54px */
             overflow: hidden;
             position: relative;
         }
@@ -294,16 +294,16 @@
             position: absolute;
             left: 0;
             right: 0;
-            top: 22px;
+            top: 24px;
             transition: transform 0.25s cubic-bezier(0.25, 1, 0.5, 1);
         }
         
         .speed-reel-item {
-            font-size: 18px; /* 16px -> 18px */
+            font-size: 20px;    /* 18px -> 20px */
             color: #059669;
             font-weight: 700;
-            height: 26px;
-            line-height: 26px;
+            height: 28px;
+            line-height: 28px;
             opacity: 0;
             transition: opacity 0.2s ease;
         }
@@ -315,20 +315,20 @@
             flex-direction: column;
         }
         .btn.speed-btn {
-            width: 90px;
-            height: 48px;
-            font-size: 14px; /* 12px -> 14px */
-            border-radius: 10px;
+            width: 100px;       /* 90px -> 100px */
+            height: 54px;       /* 48px -> 54px */
+            font-size: 16px;    /* 14px -> 16px */
+            border-radius: 12px;
         }
 
         #bpmInput {
-            width: 80px;
-            height: 48px;
+            width: 90px;        /* 80px -> 90px */
+            height: 54px;       /* 48px -> 54px */
             background-color: #f1f5f9;
             border: none;
-            border-radius: 10px;
+            border-radius: 12px;
             font-family: inherit;
-            font-size: 20px; /* 18px -> 20px */
+            font-size: 24px;    /* 20px -> 24px */
             font-weight: 700;
             color: #6d28d9;
             text-align: center;
@@ -352,17 +352,17 @@
         }
 
         .btn.tap-btn {
-            width: 72px;
-            height: 48px;
-            font-size: 13px; /* 11px -> 13px */
-            border-radius: 10px;
+            width: 80px;        /* 72px -> 80px */
+            height: 54px;       /* 48px -> 54px */
+            font-size: 15px;    /* 13px -> 15px */
+            border-radius: 12px;
         }
 
         .btn.metro-btn {
-            width: 88px;
-            height: 48px;
-            font-size: 13px; /* 11px -> 13px */
-            border-radius: 10px;
+            width: 98px;        /* 88px -> 98px */
+            height: 54px;       /* 48px -> 54px */
+            font-size: 15px;    /* 13px -> 15px */
+            border-radius: 12px;
             display: flex;
             flex-direction: column;
             justify-content: center;
@@ -371,8 +371,8 @@
         }
         
         .metro-led {
-            width: 7px;
-            height: 7px;
+            width: 8px;
+            height: 8px;
             background-color: rgba(255, 255, 255, 0.4);
             border-radius: 50%;
             transition: all 0.2s;
@@ -383,7 +383,7 @@
 
         #videoHistorySelect {
             padding: 12px 16px;
-            font-size: 15px; /* 13px -> 15px */
+            font-size: 15px;
             font-weight: 600;
             font-family: inherit;
             background-color: #f8fafc;
@@ -745,7 +745,7 @@
                 btn.innerHTML = type + "<br><span class='btn-status' style='color: rgba(255,255,255,0.7);'>--:--</span>";
                 btn.classList.remove('active');
             } else {
-                btn.innerHTML = type + "<br><span class='btn-status' style='font-weight: 700; font-size: 14px; color: #ffffff;'>" + formatTime(val) + "</span>";
+                btn.innerHTML = type + "<br><span class='btn-status' style='font-weight: 700; font-size: 15px; color: #ffffff;'>" + formatTime(val) + "</span>";
                 btn.classList.add('active');
             }
         }
@@ -896,7 +896,7 @@
 
             var reel = document.getElementById('speedReel');
             if (reel) {
-                var offset = currentSpeedIndex * 26;
+                var offset = currentSpeedIndex * 28;
                 reel.style.transform = 'translateY(-' + offset + 'px)';
 
                 var items = reel.getElementsByClassName('speed-reel-item');
