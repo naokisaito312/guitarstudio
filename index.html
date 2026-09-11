@@ -3,1362 +3,618 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Guitar Lesson Studio</title>
+    <title>Family Talk</title>
     <style>
-       html, body {
+        * {
+            box-sizing: border-box;
             margin: 0;
             padding: 0;
-            width: 100%;
-            height: 100vh;
-            overflow: hidden;
-            background-color: #f1f5f9;
-            color: #1e293b;
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, "SF Pro JP", "SF Pro Display", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
         }
 
         body {
-            /* Google TV Safe Area Margin (左右 48px, 上下 36px) */
-            padding: 36px 48px;
-            display: flex;
-            flex-direction: column;
-            box-sizing: border-box;
-            gap: 16px;
-        }
-        
-        /* URL入力エリア */
-        .input-container {
-            width: 100%;
-            display: flex;
-            gap: 12px;
-            background: #ffffff;
-            padding: 10px 14px;
-            border-radius: 16px;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
-            box-sizing: border-box;
-            flex-shrink: 0;
-        }
-        .input-container input {
-            flex: 1;
-            padding: 14px 20px;
-            font-size: 17px;
-            font-weight: 500;
-            background-color: #f8fafc;
-            border: none;
-            border-radius: 12px;
-            color: #0f172a;
-            font-family: inherit;
-            transition: all 0.2s ease;
-        }
-        .input-container input:focus {
-            outline: none;
-            background-color: #e2e8f0;
-        }
-        .input-container button {
-            padding: 14px 32px;
-            font-size: 17px;
-            background-color: #4f46e5;
-            color: #ffffff;
-            border: none;
-            border-radius: 12px;
-            cursor: pointer;
-            font-weight: 700;
-            letter-spacing: 0.5px;
-            transition: all 0.2s ease;
-            box-shadow: 0 4px 12px rgba(79, 70, 229, 0.25);
-        }
-        .input-container button:hover {
-            background-color: #4338ca;
-            transform: translateY(-1px);
-            box-shadow: 0 6px 16px rgba(79, 70, 229, 0.35);
-        }
-        
-        /* プレイヤー＆Webカメラ メイン領域 */
-        .stage-wrapper {
-            width: 100%;
-            flex: 1;
-            min-height: 0;
-            display: flex;
-            gap: 16px;
-            align-items: stretch;
-        }
-
-        /* 縦並びの各カラム（動画側・カメラ側） */
-        .stage-column {
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-            height: 100%;
-        }
-
-        .stage-column.video-column {
-            flex: 1;
-            min-width: 0;
-        }
-
-        .stage-column.camera-column {
-            width: 840px;
-            max-width: 45vw;
-            flex-shrink: 0;
-        }
-
-        /* プレイヤーのラッパー */
-        .video-container {
-            width: 100%;
-            flex: 1;
-            position: relative;
-            background-color: #0f172a;
-            border-radius: 20px;
+            background-color: #121214;
+            color: #f5f5f7;
+            height: 100vh;
+            width: 100vw;
             overflow: hidden;
-            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.08);
-            box-sizing: border-box;
             display: flex;
-            justify-content: center;
-            align-items: center;
         }
 
-        .no-video-message {
-            color: #64748b;
-            font-size: 18px;
-            font-weight: 600;
-            letter-spacing: 1px;
-            text-align: center;
-        }
-        
-        #player, #player iframe {
-            position: absolute;
+        /* 全画面スタートオーバーレイ（ワンクリック開始用） */
+        #start-overlay {
+            position: fixed;
             top: 0;
             left: 0;
-            width: 100%;
-            height: 100%;
-            transition: opacity 0.05s linear;
-        }
-
-        /* ミニマル再生バー */
-        .minimal-progressbar-container {
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            width: 100%;
-            height: 32px;
-            z-index: 10;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(18, 18, 20, 0.85);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
             display: flex;
-            align-items: flex-end;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
             cursor: pointer;
-            background: linear-gradient(to top, rgba(0,0,0,0.35), transparent);
+            transition: opacity 0.5s ease;
         }
 
-        .minimal-progressbar-bg {
-            width: 100%;
-            height: 5px;
-            background-color: rgba(255, 255, 255, 0.25);
-            transition: height 0.15s ease;
-            position: relative;
-        }
-
-        .minimal-progressbar-container:hover .minimal-progressbar-bg {
-            height: 8px;
-        }
-
-        .minimal-progressbar-fill {
-            width: 0%;
-            height: 100%;
-            background-color: #ef4444;
-            transition: width 0.1s linear;
-            position: relative;
-        }
-
-        /* 先端の小さな丸（ピン） */
-        .minimal-progressbar-fill::after {
-            content: '';
-            position: absolute;
-            right: -6px;
-            top: 50%;
-            transform: translateY(-50%) scale(0.8);
-            width: 12px;
-            height: 12px;
-            background-color: #ef4444;
-            border-radius: 50%;
-            transition: transform 0.15s ease;
-        }
-
-        .minimal-progressbar-container:hover .minimal-progressbar-fill::after {
-            transform: translateY(-50%) scale(1.2);
-        }
-
-        /* ★再生時間表示ツールチップ (MM:SS) - 文字サイズ拡大調整 */
-        .mini-time-tooltip {
-            position: absolute;
-            right: 0;
-            top: -38px;
-            transform: translateX(50%);
-            background-color: rgba(15, 23, 42, 0.9);
-            color: #ffffff;
-            font-size: 16px;       /* 11px -> 16px へ拡大 */
-            font-weight: 800;      /* 太字化 */
-            font-family: monospace, sans-serif;
-            padding: 4px 10px;     /* パディング拡張 */
-            border-radius: 6px;
-            pointer-events: none;
-            white-space: nowrap;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            letter-spacing: 0.5px;
-        }
-
-        /* Webカメラプレビュー領域 */
-        .camera-container {
-            width: 100%;
-            flex: 1;
-            background-color: #e2e8f0;
-            border-radius: 20px;
-            overflow: hidden;
-            position: relative;
-            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            box-sizing: border-box;
-        }
-
-        .camera-container video {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            transform: scaleX(1);
-            display: none;
-            transition: transform 0.2s ease;
-        }
-
-        /* 反転（Mirror）時のスタイル */
-        .camera-container video.mirror {
-            transform: scaleX(-1);
-        }
-
-        .camera-overlay {
-            color: #64748b;
-            font-size: 18px;
-            font-weight: 600;
+        .start-card {
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            padding: 48px 64px;
+            border-radius: 28px;
             text-align: center;
-            padding: 10px;
-            user-select: none;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
+            max-width: 500px;
         }
 
-        /* コントロールパネル */
-        .controls {
-            width: 100%;
-            padding: 4px 0;
-            display: flex;
-            gap: 12px;
-            justify-content: center;
-            align-items: center;
-            flex-wrap: wrap;
-            box-sizing: border-box;
-            flex-shrink: 0;
+        .start-card h1 {
+            font-size: 26px;
+            font-weight: 600;
+            margin-bottom: 12px;
+            letter-spacing: -0.5px;
         }
-        
-        .btn {
-            width: 150px;
-            height: 68px;
-            padding: 0;
-            font-size: 18px;
-            font-weight: 700;
-            font-family: inherit;
+
+        .start-card p {
+            font-size: 15px;
+            color: #aeaeb2;
+            margin-bottom: 32px;
+            line-height: 1.5;
+        }
+
+        .start-button {
+            background: #0a84ff;
+            color: white;
             border: none;
+            padding: 16px 36px;
+            font-size: 17px;
+            font-weight: 600;
             border-radius: 16px;
             cursor: pointer;
-            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-            user-select: none;
-            display: inline-flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            text-align: center;
-            line-height: 1.2;
-            outline: none;
-        }
-        .btn:focus { outline: none; }
-        .btn:hover {
-            transform: translateY(-2px);
-            filter: brightness(1.08);
-        }
-        .btn-status {
-            font-size: 15px;
-            margin-top: 3px;
-            font-family: inherit;
-        }
-        .btn:active {
-            transform: translateY(0);
-            filter: brightness(0.95);
+            transition: background 0.2s, transform 0.1s;
+            box-shadow: 0 4px 12px rgba(10, 132, 255, 0.3);
         }
 
-        /* カラー・テーマ設定 */
-        .btn-blue {
-            background-color: #3b82f6;
-            color: #ffffff;
-            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+        .start-button:hover {
+            background: #0071e3;
         }
 
-        .btn.speed-btn {
-            background-color: #10b981;
-            color: #ffffff;
-            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+        .start-button:active {
+            transform: scale(0.98);
         }
 
-        .btn.ab-btn {
-            background-color: #f43f5e;
-            color: #ffffff;
-            box-shadow: 0 4px 12px rgba(244, 63, 94, 0.3);
-        }
-        .btn.ab-btn.active {
-            background-color: #be123c !important;
-            box-shadow: 0 6px 16px rgba(190, 18, 60, 0.4) !important;
-        }
-
-        .btn.tap-btn {
-            background-color: #06b6d4;
-            color: #ffffff;
-            box-shadow: 0 4px 12px rgba(6, 182, 212, 0.3);
-        }
-
-        .btn.metro-btn {
-            background-color: #8b5cf6;
-            color: #ffffff;
-            box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3);
-        }
-
-        /* カメラトグルボタン */
-        .btn.camera-btn {
-            background-color: #64748b;
-            color: #ffffff;
-            box-shadow: 0 4px 12px rgba(100, 116, 139, 0.25);
-        }
-        .btn.camera-btn.active {
-            background-color: #10b981 !important;
-            box-shadow: 0 4px 14px rgba(16, 185, 129, 0.35) !important;
-        }
-        .btn.camera-btn.active-mirror {
-            background-color: #06b6d4 !important;
-            box-shadow: 0 4px 14px rgba(6, 182, 212, 0.35) !important;
-        }
-
-        .ab-btn { position: relative; }
-
-        /* スピード・タップ・パネル群 */
-        .speed-panel, .tap-panel {
+        /* メインレイアウト (左70% : 右30%) */
+        .main-container {
             display: flex;
-            align-items: center;
-            background: #ffffff;
-            padding: 6px 12px;
-            border-radius: 18px;
-            border: none;
-            gap: 12px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            width: 100vw;
+            height: 100vh;
         }
 
-        .speed-display {
-            background: #f1f5f9;
-            padding: 4px 14px;
-            border-radius: 12px;
-            font-size: 13px;
-            font-weight: 700;
-            color: #64748b;
-            text-align: center;
-            border: none;
-            height: 54px;
-            overflow: hidden;
+        /* 左側: YouTubeプレイヤーエリア (70%) */
+        .video-section {
+            width: 70%;
+            height: 100%;
+            background: #000;
             position: relative;
-        }
-        
-        .speed-reel {
             display: flex;
             flex-direction: column;
+        }
+
+        /* URL入力フロートバー */
+        .url-bar {
             position: absolute;
-            left: 0;
-            right: 0;
             top: 24px;
-            transition: transform 0.25s cubic-bezier(0.25, 1, 0.5, 1);
-        }
-        
-        .speed-reel-item {
-            font-size: 20px;
-            color: #059669;
-            font-weight: 700;
-            height: 28px;
-            line-height: 28px;
-            opacity: 0;
-            transition: opacity 0.2s ease;
-        }
-        
-        .speed-reel-item.active { opacity: 1; }
-
-        .speed-buttons {
+            left: 24px;
+            z-index: 10;
             display: flex;
-            flex-direction: column;
-        }
-        .btn.speed-btn {
-            width: 100px;
-            height: 54px;
-            font-size: 16px;
-            border-radius: 12px;
+            gap: 10px;
+            background: rgba(28, 28, 30, 0.75);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            padding: 8px 12px;
+            border-radius: 14px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+            width: calc(100% - 48px);
+            max-width: 540px;
         }
 
-        #bpmInput {
-            width: 90px;
-            height: 54px;
-            background-color: #f1f5f9;
-            border: none;
-            border-radius: 12px;
-            font-family: inherit;
-            font-size: 24px;
-            font-weight: 700;
-            color: #6d28d9;
-            text-align: center;
-            margin: 0;
+        .url-input {
+            flex: 1;
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 8px;
+            padding: 8px 14px;
+            color: #fff;
+            font-size: 14px;
             outline: none;
-            transition: all 0.2s ease;
+            transition: border-color 0.2s;
+        }
+
+        .url-input:focus {
+            border-color: #0a84ff;
+        }
+
+        .url-button {
+            background: rgba(255, 255, 255, 0.15);
+            border: none;
+            color: #fff;
+            padding: 8px 16px;
+            font-size: 14px;
+            font-weight: 500;
+            border-radius: 8px;
             cursor: pointer;
-        }
-        #bpmInput:hover {
-            background-color: #e2e8f0;
-        }
-        #bpmInput:focus {
-            background-color: #e2e8f0;
-            color: #5b21b6;
+            transition: background 0.2s;
         }
 
-        #bpmInput::-webkit-outer-spin-button,
-        #bpmInput::-webkit-inner-spin-button {
-            -webkit-appearance: none;
-            margin: 0;
+        .url-button:hover {
+            background: rgba(255, 255, 255, 0.25);
         }
 
-        .btn.tap-btn {
-            width: 80px;
-            height: 54px;
-            font-size: 15px;
-            border-radius: 12px;
+        /* YouTube埋め込みコンテナ */
+        .video-wrapper {
+            flex: 1;
+            width: 100%;
+            height: 100%;
         }
 
-        .btn.metro-btn {
-            width: 98px;
-            height: 54px;
-            font-size: 15px;
-            border-radius: 12px;
+        .video-wrapper iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+
+        /* 右側: ライブ字幕タイムラインエリア (30%) */
+        .caption-section {
+            width: 30%;
+            height: 100%;
+            background: #1c1c1e;
+            border-left: 1px solid rgba(255, 255, 255, 0.08);
             display: flex;
             flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            gap: 4px;
         }
-        
-        .metro-led {
+
+        .caption-header {
+            padding: 20px 24px;
+            background: rgba(28, 28, 30, 0.9);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .caption-title {
+            font-size: 16px;
+            font-weight: 600;
+            letter-spacing: -0.3px;
+        }
+
+        .status-indicator {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 12px;
+            color: #32d74b;
+            background: rgba(50, 215, 75, 0.12);
+            padding: 4px 10px;
+            border-radius: 20px;
+        }
+
+        .status-dot {
             width: 8px;
             height: 8px;
-            background-color: rgba(255, 255, 255, 0.4);
+            background-color: #32d74b;
             border-radius: 50%;
-            transition: all 0.2s;
+            box-shadow: 0 0 8px #32d74b;
+            animation: pulse 2s infinite;
         }
-        
-        .metro-led.on { background-color: #ffffff; }
-        .metro-led.flash { transform: scale(1.5); }
 
-        #videoHistorySelect {
-            padding: 12px 16px;
-            font-size: 15px;
-            font-weight: 600;
-            font-family: inherit;
-            background-color: #f8fafc;
-            color: #334155;
-            border: none;
-            border-radius: 12px;
-            cursor: pointer;
-            outline: none;
-            max-width: 280px;
-            transition: background-color 0.2s;
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.4; }
+            100% { opacity: 1; }
         }
-        #videoHistorySelect:hover { background-color: #e2e8f0; }
-        #videoHistorySelect option {
-            background-color: #ffffff;
-            color: #0f172a;
+
+        /* チャットタイムライン（LINE風） */
+        .chat-timeline {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            scroll-behavior: smooth;
+        }
+
+        .chat-timeline::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .chat-timeline::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.15);
+            border-radius: 3px;
+        }
+
+        .chat-bubble-row {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            width: 100%;
+        }
+
+        .chat-bubble {
+            max-width: 85%;
+            padding: 12px 16px;
+            border-radius: 18px;
+            font-size: 15px;
+            line-height: 1.5;
+            word-break: break-all;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(8px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* 家族の会話（マイク）バブル */
+        .chat-bubble.family {
+            background: #2c2c2e;
+            color: #fff;
+            border-bottom-left-radius: 4px;
+            border: 1px solid rgba(255, 255, 255, 0.06);
+        }
+
+        .chat-time {
+            font-size: 11px;
+            color: #8e8e93;
+            margin-top: 4px;
+            padding-left: 4px;
+        }
+
+        .placeholder-text {
+            text-align: center;
+            color: #8e8e93;
+            font-size: 14px;
+            margin-top: 40px;
+            line-height: 1.6;
         }
     </style>
 </head>
 <body>
 
-    <div class="input-container">
-        <input type="text" id="videoIdInput" placeholder="YouTube Video ID または URL を入力">
-        <select id="videoHistorySelect" onchange="loadVideoFromHistory()">
-            <option value="">-- HISTORY --</option>
-        </select>
-        <button class="btn" style="width: auto; height: auto;" onclick="loadVideo()">LOAD</button>
+    <!-- ワンクリック開始オーバーレイ -->
+    <div id="start-overlay">
+        <div class="start-card" onclick="event.stopPropagation()">
+            <h1>リビングTV サポート字幕</h1>
+            <p>画面をクリック（またはボタンを押す）して音声認識とアプリを開始します。</p>
+            <button class="start-button" id="start-btn">開始する</button>
+        </div>
     </div>
 
-    <!-- YouTubeプレイヤー ＆ カメラモニター メインエリア -->
-    <div class="stage-wrapper">
-        
-        <!-- 左側：動画 ＋ 動画コントロール -->
-        <div class="stage-column video-column">
-            <div class="video-container">
-                <div id="player"></div>
-                <div id="noVideoMsg" class="no-video-message">NO VIDEO LOADED</div>
-                
-                <!-- ミニマル再生バー -->
-                <div class="minimal-progressbar-container" id="miniProgressContainer">
-                    <div class="minimal-progressbar-bg">
-                        <div class="minimal-progressbar-fill" id="miniProgressFill">
-                            <span class="mini-time-tooltip" id="miniTimeTooltip">00:00</span>
-                        </div>
-                    </div>
-                </div>
+    <!-- メイン画面 -->
+    <div class="main-container">
+        <!-- 左側: YouTubeプレイヤー (70%) -->
+        <div class="video-section">
+            <div class="url-bar">
+                <input type="text" id="youtube-url-input" class="url-input" placeholder="YouTubeのURLを入力 (例: https://youtu.be/...)">
+                <button class="url-button" id="load-video-btn">再生</button>
             </div>
-            
-            <!-- 動画側コントロール -->
-            <div class="controls">
-                <button class="btn btn-blue" onclick="skip(-10)">-10 sec</button>
-                <button class="btn btn-blue" id="playPauseBtn" onclick="togglePlay()">Play / Pause</button>
-                <button class="btn btn-blue" onclick="skip(10)">+10 sec</button>
-
-                <div class="speed-panel">
-                    <div class="speed-display" id="speedDisplay">
-                        SPEED
-                        <div class="speed-reel" id="speedReel">
-                            <div class="speed-reel-item default-speed active">1.0x</div>
-                            <div class="speed-reel-item">0.75x</div>
-                            <div class="speed-reel-item">0.5x</div>
-                        </div>
-                    </div>
-                    <div class="speed-buttons">
-                        <button class="btn speed-btn" onclick="toggleSpeed()">SPEED</button>
-                    </div>
-                </div>
-                
-                <button class="btn ab-btn" id="btnA" 
-                        onmousedown="startPress('A')" 
-                        onmouseup="endPress('A')" 
-                        onmouseleave="cancelPress('A')"
-                        ontouchstart="startPress('A')" 
-                        ontouchend="endPress('A')">A<br><span class="btn-status" style="color: rgba(255,255,255,0.7);">--:--</span></button>
-                        
-                <button class="btn ab-btn" id="btnB" 
-                        onmousedown="startPress('B')" 
-                        onmouseup="endPress('B')" 
-                        onmouseleave="cancelPress('B')"
-                        ontouchstart="startPress('B')" 
-                        ontouchend="endPress('B')">B<br><span class="btn-status" style="color: rgba(255,255,255,0.7);">--:--</span></button>
-
-                <div class="tap-panel">
-                    <button class="btn metro-btn" id="metroBtn" onclick="toggleMetronome()">
-                        METRO
-                        <span class="metro-led" id="metroLed"></span>
-                    </button>
-                    <input type="number" id="bpmInput" value="120" min="30" max="300" 
-                           oninput="applyBpmFromInput()" 
-                           onkeydown="handleBpmEnter(event)">
-                    <button class="btn tap-btn" id="tapBtn" onmousedown="tapBPM()">TAP</button>
-                </div>
+            <div class="video-wrapper">
+                <div id="youtube-player" style="width:100%; height:100%;"></div>
             </div>
         </div>
 
-        <!-- 右側：カメラ映像 ＋ カメラコントロール -->
-        <div class="stage-column camera-column">
-            <div class="camera-container">
-                <video id="webcam" autoplay playsinline muted></video>
-                <div class="camera-overlay" id="cameraOverlay">CAMERA OFF</div>
+        <!-- 右側: ライブ字幕タイムライン (30%) -->
+        <div class="caption-section">
+            <div class="caption-header">
+                <span class="caption-title">会話字幕</span>
+                <div class="status-indicator">
+                    <div class="status-dot"></div>
+                    <span>認識中</span>
+                </div>
             </div>
-            
-            <!-- カメラ側コントロール -->
-            <div class="controls">
-                <button class="btn camera-btn" id="cameraToggleBtn" onclick="toggleCamera()">
-                    CAMERA<br><span class="btn-status" id="cameraStatusText" style="color: rgba(255,255,255,0.7);">OFF</span>
-                </button>
+            <div class="chat-timeline" id="chat-timeline">
+                <div class="placeholder-text" id="timeline-placeholder">
+                    マイクからの音声を自動でテキスト化してここに表示します...
+                </div>
             </div>
         </div>
-
     </div>
 
+    <!-- YouTube IFrame API -->
     <script>
-        var tag = document.createElement('script');
-        tag.src = "https://www.youtube.com/iframe_api";
+        // 動作実績のある別アプリと同じ方式でYouTube IFrame APIを動的に読み込む
+        var youtubeApiTag = document.createElement('script');
+        youtubeApiTag.src = 'https://www.youtube.com/iframe_api';
         var firstScriptTag = document.getElementsByTagName('script')[0];
-        firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+        firstScriptTag.parentNode.insertBefore(youtubeApiTag, firstScriptTag);
 
-        var player;
-        var currentVideoId = null;
+        let player;
+        let isYouTubePlayerReady = false;
+        let pendingVideoId = null;
+        let recognition = null;
+        let isStarted = false;
+        let shouldRestartRecognition = false;
+        let restartTimer = null;
+        let interimRow = null;
 
-        var pointA = null;
-        var pointB = null;
-        var loopTimer = null;
+        const overlay = document.getElementById('start-overlay');
+        const startBtn = document.getElementById('start-btn');
+        const statusIndicator = document.querySelector('.status-indicator');
+        const statusDot = document.querySelector('.status-dot');
+        const statusText = statusIndicator.querySelector('span');
 
-        var isCountingIn = false;
-        
-        var pressTimer = null;
-        var isLongPress = false;
-        var longPressDuration = 500;
+        function setRecognitionStatus(text, state = 'idle') {
+            statusText.textContent = text;
+            const colors = {
+                listening: '#32d74b',
+                starting: '#ffd60a',
+                error: '#ff453a',
+                idle: '#8e8e93'
+            };
+            const color = colors[state] || colors.idle;
+            statusIndicator.style.color = color;
+            statusIndicator.style.background = `${color}1f`;
+            statusDot.style.backgroundColor = color;
+            statusDot.style.boxShadow = `0 0 8px ${color}`;
+        }
 
-        var cameraStream = null;
-        var cameraMode = 0;
-
+        // YouTube 動画プレイヤー初期化
         function onYouTubeIframeAPIReady() {
-            player = new YT.Player('player', {
+            player = new YT.Player('youtube-player', {
+                height: '100%',
+                width: '100%',
+                videoId: 'jfKfPfyJRdk',
                 playerVars: {
-                    'playsinline': 1,
-                    'controls': 1,
-                    'rel': 0
+                    autoplay: 0,
+                    controls: 1,
+                    rel: 0,
+                    playsinline: 1
                 },
                 events: {
-                    'onStateChange': onPlayerStateChange
+                    onReady: function () {
+                        isYouTubePlayerReady = true;
+                        if (pendingVideoId) {
+                            player.loadVideoById(pendingVideoId);
+                            pendingVideoId = null;
+                        }
+                    },
+                    onError: function (event) {
+                        console.warn('YouTubeプレーヤーエラー:', event.data);
+                    }
                 }
             });
         }
 
-        async function toggleCamera() {
-            var videoElem = document.getElementById('webcam');
-            var overlayElem = document.getElementById('cameraOverlay');
-            var btnElem = document.getElementById('cameraToggleBtn');
-            var statusElem = document.getElementById('cameraStatusText');
-
-            cameraMode = (cameraMode + 1) % 3;
-
-            if (cameraMode === 0) {
-                if (cameraStream) {
-                    cameraStream.getTracks().forEach(function(track) { track.stop(); });
-                    cameraStream = null;
-                }
-                videoElem.style.display = 'none';
-                videoElem.classList.remove('mirror');
-                overlayElem.style.display = 'block';
-                btnElem.classList.remove('active', 'active-mirror');
-                statusElem.textContent = 'OFF';
-                statusElem.style.color = 'rgba(255,255,255,0.7)';
-            } 
-            else if (cameraMode === 1) {
-                if (!cameraStream) {
-                    try {
-                        cameraStream = await navigator.mediaDevices.getUserMedia({ 
-                            video: { width: { ideal: 720 }, height: { ideal: 1280 } }, 
-                            audio: false 
-                        });
-                        videoElem.srcObject = cameraStream;
-                    } catch (err) {
-                        alert('Webカメラへのアクセスが拒否されたか、カメラが見つかりませんでした。');
-                        console.error(err);
-                        cameraMode = 0;
-                        return;
-                    }
-                }
-                videoElem.style.display = 'block';
-                videoElem.classList.remove('mirror');
-                overlayElem.style.display = 'none';
-                btnElem.classList.remove('active-mirror');
-                btnElem.classList.add('active');
-                statusElem.textContent = 'ON';
-                statusElem.style.color = '#ffffff';
-            } 
-            else if (cameraMode === 2) {
-                videoElem.classList.add('mirror');
-                btnElem.classList.remove('active');
-                btnElem.classList.add('active-mirror');
-                statusElem.textContent = 'MIRROR';
-                statusElem.style.color = '#ffffff';
-            }
-        }
-
-        function togglePlay() {
-            if (!player || typeof player.getPlayerState !== 'function') return;
-            var state = player.getPlayerState();
-            if (state == YT.PlayerState.PLAYING) {
-                player.pauseVideo();
-            } else {
-                player.playVideo();
-            }
-        }
-
-        function skip(seconds) {
-            if (!player || typeof player.getCurrentTime !== 'function') return;
-            var currentTime = player.getCurrentTime();
-            var duration = player.getDuration();
-            var newTime = currentTime + seconds;
-
-            if (newTime < 0) newTime = 0;
-            if (newTime > duration) newTime = duration;
-
-            player.seekTo(newTime, true);
-        }
-
-        var videoHistory = [];
-        var MAX_HISTORY = 8;
-
-        function loadVideo() {
-            var input = document.getElementById('videoIdInput').value.trim();
-            if (!input) return;
-            
-            var videoId = extractVideoId(input);
-            
-            if (videoId && player && typeof player.loadVideoById === 'function') {
-                currentVideoId = videoId;
-                player.loadVideoById(videoId);
-                document.getElementById('noVideoMsg').style.display = 'none';
-                resetLoopSettings();
-            } else {
-                alert('有効なYouTubeのURLまたは動画IDが見つかりませんでした。');
-            }
-        }
-
-        function extractVideoId(url) {
-            var regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
-            var match = url.match(regExp);
-            return (match && match[2].length == 11) ? match[2] : url;
-        }
-
-        function saveToHistory(id, title) {
-            if (!id) return;
-            var finalTitle = (title && title !== id) ? title : "YouTube Video (" + id + ")";
-
-            for (var i = 0; i < videoHistory.length; i++) {
-                if (videoHistory[i].id === id) {
-                    if (finalTitle.indexOf("YouTube Video") === 0 && videoHistory[i].title.indexOf("YouTube Video") !== 0) {
-                        finalTitle = videoHistory[i].title;
-                    }
-                    videoHistory.splice(i, 1);
-                    break;
-                }
-            }
-            
-            videoHistory.unshift({ id: id, title: finalTitle });
-            if (videoHistory.length > MAX_HISTORY) videoHistory.pop();
-            
-            localStorage.setItem('yt_lesson_history', JSON.stringify(videoHistory));
-            updateHistorySelect();
-        }
-
-        function updateHistorySelect() {
-            var select = document.getElementById('videoHistorySelect');
-            if (!select) return;
-            
-            select.innerHTML = '<option value="">-- HISTORY --</option>';
-            
-            for (var i = 0; i < videoHistory.length; i++) {
-                var option = document.createElement('option');
-                option.value = videoHistory[i].id;
-                
-                var displayTitle = videoHistory[i].title;
-                if (displayTitle.length > 25) {
-                    displayTitle = displayTitle.substring(0, 25) + "...";
-                }
-                option.textContent = displayTitle;
-                
-                select.appendChild(option);
-            }
-
-            if (videoHistory.length > 0) {
-                var clearOption = document.createElement('option');
-                clearOption.value = "__CLEAR_ALL__";
-                clearOption.textContent = "❌ CLEAR ALL HISTORY";
-                clearOption.style.color = "#ef4444";
-                select.appendChild(clearOption);
-            }
-        }
-
-        function loadVideoFromHistory() {
-            var select = document.getElementById('videoHistorySelect');
-            var selectedId = select.value;
-            
-            if (selectedId === "__CLEAR_ALL__") {
-                if (confirm('すべての視聴履歴を削除しますか？')) {
-                    videoHistory = [];
-                    localStorage.removeItem('yt_lesson_history');
-                    updateHistorySelect();
-                    document.getElementById('videoIdInput').value = '';
-                } else {
-                    select.value = "";
-                }
+        document.getElementById('load-video-btn').addEventListener('click', () => {
+            const value = document.getElementById('youtube-url-input').value.trim();
+            const videoId = extractYouTubeVideoId(value);
+            if (!videoId) {
+                alert('YouTubeのURLまたは11文字の動画IDを確認してください。');
                 return;
             }
-            
-            if (selectedId) {
-                document.getElementById('videoIdInput').value = selectedId;
-                loadVideo();
+
+            // APIの読み込み前に押された場合は、準備完了後に自動再生する
+            if (!isYouTubePlayerReady || !player || typeof player.loadVideoById !== 'function') {
+                pendingVideoId = videoId;
+                return;
             }
-        }
 
-        function onPlayerStateChange(event) {
-            if (isCountingIn) return;
-
-            if (event.data == YT.PlayerState.PLAYING) {
-                if (player && typeof player.getVideoData === 'function') {
-                    var videoData = player.getVideoData();
-                    var targetId = videoData.video_id || currentVideoId;
-                    var targetTitle = videoData.title || targetId;
-                    
-                    if (targetId) saveToHistory(targetId, targetTitle);
-                }
-                startLoopCheck();
-            } else if (event.data == YT.PlayerState.PAUSED || event.data == YT.PlayerState.ENDED) {
-                if (pointA === null || pointB === null) stopLoopCheck();
-            }
-        }
-
-        /* 時間フォーマットヘルパー (MM:SS) */
-        function formatMMSS(seconds) {
-            var m = Math.floor(seconds / 60);
-            var s = Math.floor(seconds % 60);
-            return (m < 10 ? "0" : "") + m + ":" + (s < 10 ? "0" : "") + s;
-        }
-
-        /* ミニマル再生バーの同期＆シーク処理 */
-        var isMiniProgressBarSeeking = false;
-
-        setInterval(function() {
-            if (!player || typeof player.getCurrentTime !== 'function' || isMiniProgressBarSeeking) return;
-
-            var currentTime = player.getCurrentTime();
-            var duration = player.getDuration();
-
-            if (duration > 0) {
-                var percentage = (currentTime / duration) * 100;
-                var fillElem = document.getElementById('miniProgressFill');
-                var tooltipElem = document.getElementById('miniTimeTooltip');
-
-                if (fillElem) fillElem.style.width = percentage + '%';
-                if (tooltipElem) tooltipElem.textContent = formatMMSS(currentTime);
-            }
-        }, 250);
-
-        function handleMiniProgressSeek(e) {
-            if (!player || typeof player.getDuration !== 'function') return;
-            var container = document.getElementById('miniProgressContainer');
-            if (!container) return;
-
-            var rect = container.getBoundingClientRect();
-            var clickX = e.clientX - rect.left;
-            var width = rect.width;
-
-            if (width > 0) {
-                var ratio = Math.max(0, Math.min(1, clickX / width));
-                var duration = player.getDuration();
-                var targetTime = ratio * duration;
-
-                var fillElem = document.getElementById('miniProgressFill');
-                var tooltipElem = document.getElementById('miniTimeTooltip');
-
-                if (fillElem) fillElem.style.width = (ratio * 100) + '%';
-                if (tooltipElem) tooltipElem.textContent = formatMMSS(targetTime);
-
-                player.seekTo(targetTime, true);
-            }
-        }
-
-        window.addEventListener('DOMContentLoaded', function() {
-            var container = document.getElementById('miniProgressContainer');
-            if (container) {
-                container.addEventListener('mousedown', function(e) {
-                    isMiniProgressBarSeeking = true;
-                    handleMiniProgressSeek(e);
-                });
-
-                window.addEventListener('mousemove', function(e) {
-                    if (isMiniProgressBarSeeking) handleMiniProgressSeek(e);
-                });
-
-                window.addEventListener('mouseup', function(e) {
-                    if (isMiniProgressBarSeeking) isMiniProgressBarSeeking = false;
-                });
-
-                // タッチ対応
-                container.addEventListener('touchstart', function(e) {
-                    isMiniProgressBarSeeking = true;
-                    if (e.touches.length > 0) handleMiniProgressSeek(e.touches[0]);
-                });
-                window.addEventListener('touchmove', function(e) {
-                    if (isMiniProgressBarSeeking && e.touches.length > 0) handleMiniProgressSeek(e.touches[0]);
-                });
-                window.addEventListener('touchend', function() {
-                    isMiniProgressBarSeeking = false;
-                });
-            }
+            player.loadVideoById(videoId);
         });
 
-        function startPress(type) {
-            isLongPress = false;
-            pressTimer = setTimeout(function() {
-                isLongPress = true;
-                clearPoint(type);
-            }, longPressDuration);
-        }
+        function extractYouTubeVideoId(input) {
+            const value = input.trim();
 
-        function endPress(type) {
-            if (!pressTimer) return; 
-            clearTimeout(pressTimer);
-            pressTimer = null;
-            
-            if (!isLongPress) handleButtonClick(type);
-        }
-
-        function cancelPress(type) { clearTimeout(pressTimer); }
-
-        function handleButtonClick(type) {
-            if (!player || typeof player.getCurrentTime !== 'function') return;
-
-            var val = (type === 'A') ? pointA : pointB;
-
-            if (val === null) {
-                var rawTime = player.getCurrentTime();
-                var correctedTime = rawTime - 0.18;
-                if (correctedTime < 0) correctedTime = 0;
-
-                if (type === 'A') pointA = correctedTime;
-                else pointB = correctedTime;
-                
-                updateButtonUI(type);
-
-                if (pointA !== null && pointB !== null) startLoopCheck();
-            } else {
-                player.seekTo(val, true);
+            // 11文字の動画IDが直接入力された場合
+            if (/^[A-Za-z0-9_-]{11}$/.test(value)) {
+                return value;
             }
-        }
 
-        function clearPoint(type) {
-            if (type === 'A') {
-                pointA = null;
-                updateButtonUI('A');
-            } else if (type === 'B') {
-                pointB = null;
-                updateButtonUI('B');
-            }
-        }
+            try {
+                const url = new URL(value);
+                const hostname = url.hostname.toLowerCase().replace(/^www\./, '');
 
-        function updateButtonUI(type) {
-            var btn = document.getElementById('btn' + type);
-            var val = (type === 'A') ? pointA : pointB;
-        
-            if (val === null) {
-                btn.innerHTML = type + "<br><span class='btn-status' style='color: rgba(255,255,255,0.7);'>--:--</span>";
-                btn.classList.remove('active');
-            } else {
-                btn.innerHTML = type + "<br><span class='btn-status' style='font-weight: 700; font-size: 15px; color: #ffffff;'>" + formatTime(val) + "</span>";
-                btn.classList.add('active');
-            }
-        }
+                // YouTube以外のURLは受け付けない
+                const isYouTubeHost =
+                    hostname === 'youtube.com' ||
+                    hostname.endsWith('.youtube.com') ||
+                    hostname === 'youtu.be' ||
+                    hostname === 'youtube-nocookie.com' ||
+                    hostname.endsWith('.youtube-nocookie.com');
 
-        function formatTime(seconds) {
-            var m = Math.floor(seconds / 60);
-            var s = Math.floor(seconds % 60);
-            return m + ":" + (s < 10 ? "0" : "") + s;
-        }
+                if (!isYouTubeHost) return null;
 
-        var isLoopSequence = false; 
-
-        function startLoopCheck() {
-            if (loopTimer) {
-                clearInterval(loopTimer);
-                loopTimer = null;
-            }
-            
-            loopTimer = setInterval(function() {
-                if (!player || typeof player.getCurrentTime !== 'function') return;
-
-                if (pointA !== null && pointB !== null && !isLoopSequence) {
-                    var currentTime = player.getCurrentTime();
-                    
-                    if (currentTime >= 0 && currentTime >= pointB) {
-                        isLoopSequence = true; 
-                        playPikoSound();
-                        
-                        startFadeOut(function() {
-                            var preRollTime = pointA - 3;
-                            if (preRollTime < 0) preRollTime = 0;
-                            player.seekTo(preRollTime, true);
-                            
-                            player.setVolume(0);
-                            startFadeIn(function() {
-                                isLoopSequence = false;
-                            });
-                        });
-                    }
-                }
-            }, 100);
-        }
-
-        function startFadeOut(callback) {
-            var currentVolume = 100;
-            var duration = 1000;
-            var intervalTime = 50;
-            var step = currentVolume / (duration / intervalTime);
-            var pElement = document.getElementById('player');
-            
-            var fadeOutTimer = setInterval(function() {
-                if (!player || typeof player.setVolume !== 'function') {
-                    clearInterval(fadeOutTimer);
-                    if (callback) callback();
-                    return;
+                // 短縮URL: https://youtu.be/VIDEO_ID?si=...
+                if (hostname === 'youtu.be') {
+                    return validateYouTubeId(url.pathname.split('/').filter(Boolean)[0]);
                 }
 
-                currentVolume -= step;
-                if (currentVolume <= 0) {
-                    player.setVolume(0);
-                    if (pElement) pElement.style.opacity = 0;
-                    clearInterval(fadeOutTimer);
-                    if (callback) callback();
-                } else {
-                    player.setVolume(Math.round(currentVolume));
-                    if (pElement) pElement.style.opacity = (currentVolume / 100);
+                // 通常URL・モバイルURL: /watch?v=VIDEO_ID
+                const queryId = url.searchParams.get('v');
+                if (queryId) return validateYouTubeId(queryId);
+
+                // 埋め込み・Shorts・Live: /embed/ID, /shorts/ID, /live/ID
+                const parts = url.pathname.split('/').filter(Boolean);
+                const markerIndex = parts.findIndex(part =>
+                    ['embed', 'shorts', 'live', 'v'].includes(part)
+                );
+
+                if (markerIndex >= 0 && parts[markerIndex + 1]) {
+                    return validateYouTubeId(parts[markerIndex + 1]);
                 }
-            }, intervalTime);
-        }
-
-        function startFadeIn(callback) {
-            var targetVolume = 100;
-            var currentVolume = 0;
-            var duration = 2000;
-            var intervalTime = 50;
-            var step = targetVolume / (duration / intervalTime);
-            var pElement = document.getElementById('player');
-            
-            var fadeInTimer = setInterval(function() {
-                if (!player || typeof player.setVolume !== 'function') {
-                    clearInterval(fadeInTimer);
-                    if (callback) callback();
-                    return;
-                }
-
-                currentVolume += step;
-                if (currentVolume >= targetVolume) {
-                    player.setVolume(targetVolume);
-                    if (pElement) pElement.style.opacity = 1;
-                    clearInterval(fadeInTimer);
-                    if (callback) callback();
-                } else {
-                    player.setVolume(Math.round(currentVolume));
-                    if (pElement) pElement.style.opacity = (currentVolume / 100);
-                }
-            }, intervalTime);
-        }
-
-        function playPikoSound() {
-            if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-            if (audioCtx.state === 'suspended') audioCtx.resume();
-
-            var now = audioCtx.currentTime;
-            var osc = audioCtx.createOscillator();
-            var gainNode = audioCtx.createGain();
-
-            osc.connect(gainNode);
-            gainNode.connect(audioCtx.destination);
-
-            osc.type = 'sine';
-            osc.frequency.setValueAtTime(1200, now);
-            osc.frequency.setValueAtTime(1500, now + 0.04);
-
-            gainNode.gain.setValueAtTime(0.15, now);
-            gainNode.gain.exponentialRampToValueAtTime(0.001, now + 0.08);
-
-            osc.start(now);
-            osc.stop(now + 0.09);
-        }
-        
-        function stopLoopCheck() {
-            if (loopTimer) {
-                clearInterval(loopTimer);
-                loopTimer = null;
-            }
-        }
-
-        function resetLoopSettings() {
-            pointA = null;
-            pointB = null;
-            updateButtonUI('A');
-            updateButtonUI('B');
-            stopLoopCheck();
-        }
-
-        var speedRates = [1.0, 0.75, 0.5];
-        var currentSpeedIndex = 0;
-
-        function toggleSpeed() {
-            if (!player || typeof player.setPlaybackRate !== 'function') return;
-            currentSpeedIndex = (currentSpeedIndex + 1) % speedRates.length;
-            applySpeed();
-        }
-
-        function applySpeed() {
-            var targetSpeed = speedRates[currentSpeedIndex];
-            player.setPlaybackRate(targetSpeed);
-
-            var reel = document.getElementById('speedReel');
-            if (reel) {
-                var offset = currentSpeedIndex * 28;
-                reel.style.transform = 'translateY(-' + offset + 'px)';
-
-                var items = reel.getElementsByClassName('speed-reel-item');
-                for (var i = 0; i < items.length; i++) {
-                    if (i === currentSpeedIndex) items[i].classList.add('active');
-                    else items[i].classList.remove('active');
-                }
-            }
-        }
-        
-        function applyBpmFromInput() {
-            var val = parseInt(document.getElementById('bpmInput').value);
-            if (val >= 30 && val <= 300) {
-                if (isMetroPlaying && audioCtx) nextNoteTime = audioCtx.currentTime; 
-            }
-        }
-
-        function handleBpmEnter(event) {
-            if (event.key === 'Enter') {
-                event.preventDefault();
-                document.getElementById('bpmInput').blur();
-            }
-        }
-        
-        var tapTimes = [];
-
-        function tapBPM() {
-            var now = Date.now();
-
-            if (tapTimes.length > 0 && (now - tapTimes[tapTimes.length - 1] > 3000)) {
-                tapTimes = [];
+            } catch (error) {
+                console.warn('YouTube URL解析エラー:', error);
             }
 
-            tapTimes.push(now);
-
-            if (tapTimes.length > 1) {
-                var intervals = [];
-                for (var i = 1; i < tapTimes.length; i++) {
-                    intervals.push(tapTimes[i] - tapTimes[i - 1]);
-                }
-                
-                var avgInterval = intervals.reduce(function(a, b) { return a + b; }) / intervals.length;
-                var calculatedBpm = Math.round(60000 / avgInterval);
-
-                if (calculatedBpm >= 30 && calculatedBpm <= 300) {
-                    document.getElementById('bpmInput').value = calculatedBpm;
-                    if (isMetroPlaying && audioCtx) nextNoteTime = audioCtx.currentTime;
-                }
-            }
-
-            var tapBtn = document.getElementById('tapBtn');
-            tapBtn.style.filter = 'brightness(1.2)';
-            setTimeout(function() { tapBtn.style.filter = ''; }, 50);
+            return null;
         }
 
-        var audioCtx = null;
-        var metroTimer = null;
-        var isMetroPlaying = false;
-        var currentBeat = 0;
-        var nextNoteTime = 0.0;
-        var scheduleAheadTime = 0.1;
-        var lookahead = 25.0;
-
-        function toggleMetronome() {
-            if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-
-            if (pointA === null && pointB === null && (!player || typeof player.getPlayerState !== 'function' || player.getPlayerState() !== YT.PlayerState.PLAYING)) {
-                if (audioCtx.state === 'suspended') audioCtx.resume();
-            }
-
-            isMetroPlaying = !isMetroPlaying;
-            var led = document.getElementById('metroLed');
-
-            if (isMetroPlaying) {
-                var currentBPM = parseInt(document.getElementById('bpmInput').value);
-                if (isNaN(currentBPM) || currentBPM < 30 || currentBPM > 300) {
-                    currentBPM = 120;
-                    document.getElementById('bpmInput').value = 120;
-                }
-
-                currentBeat = 0;
-                nextNoteTime = audioCtx.currentTime + 0.05;
-                scheduler();
-                
-                led.classList.add('on');
-            } else {
-                if (metroTimer) clearTimeout(metroTimer);
-                
-                activeOscillators.forEach(function(activeOsc) {
-                    try { activeOsc.stop(); } catch(e) {}
-                });
-                activeOscillators = [];
-
-                led.classList.remove('on');
-                led.classList.remove('flash');
-            }
+        function validateYouTubeId(value) {
+            if (!value) return null;
+            const id = decodeURIComponent(value).trim();
+            return /^[A-Za-z0-9_-]{11}$/.test(id) ? id : null;
         }
 
-        function scheduler() {
-            while (nextNoteTime < audioCtx.currentTime + scheduleAheadTime) {
-                scheduleNote(currentBeat, nextNoteTime);
-                advanceNote();
-            }
-            metroTimer = setTimeout(scheduler, lookahead);
+        overlay.addEventListener('click', startApp);
+        startBtn.addEventListener('click', event => {
+            event.stopPropagation();
+            startApp();
+        });
+
+        function startApp() {
+            if (isStarted) return;
+            isStarted = true;
+            overlay.style.opacity = '0';
+            setTimeout(() => { overlay.style.display = 'none'; }, 500);
+            setRecognitionStatus('準備中', 'starting');
+            initSpeechRecognition();
         }
 
-        function advanceNote() {
-            var currentBPM = parseInt(document.getElementById('bpmInput').value) || 120;
-            var secondsPerBeat = 60.0 / currentBPM;
-            nextNoteTime += secondsPerBeat;
-            currentBeat = (currentBeat + 1) % 4;
-        }
-
-        var countInBeats = 0; 
-        var activeOscillators = [];
-
-        function scheduleNote(beatNumber, time) {
-            if (!isMetroPlaying) return;
-
-            var osc = audioCtx.createOscillator();
-            var gainNode = audioCtx.createGain();
-            osc.connect(gainNode);
-            gainNode.connect(audioCtx.destination);
-
-            if (beatNumber === 0) {
-                osc.frequency.setValueAtTime(880, time);
-            } else {
-                osc.frequency.setValueAtTime(440, time);
+        function initSpeechRecognition() {
+            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+            if (!SpeechRecognition) {
+                isStarted = false;
+                setRecognitionStatus('非対応ブラウザ', 'error');
+                alert('このブラウザは音声認識に対応していません。ChromeまたはEdgeをご利用ください。');
+                return;
             }
 
-            gainNode.gain.setValueAtTime(0.3, time);
-            gainNode.gain.exponentialRampToValueAtTime(0.001, time + 0.05);
+            recognition = new SpeechRecognition();
+            recognition.lang = 'ja-JP';
+            recognition.interimResults = true;
+            recognition.continuous = true;
+            recognition.maxAlternatives = 1;
+            shouldRestartRecognition = true;
 
-            osc.start(time);
-            osc.stop(time + 0.06);
+            recognition.onstart = () => {
+                clearTimeout(restartTimer);
+                setRecognitionStatus('認識中', 'listening');
+            };
 
-            activeOscillators.push(osc);
+            recognition.onaudiostart = () => setRecognitionStatus('音声入力中', 'listening');
+            recognition.onspeechstart = () => setRecognitionStatus('会話を認識中', 'listening');
 
-            setTimeout(function() {
-                var led = document.getElementById('metroLed');
-                if (led && isMetroPlaying) {
-                    led.classList.add('flash');
-                    if (beatNumber === 0) {
-                        led.style.background = '#f43f5e';
+            recognition.onresult = event => {
+                hidePlaceholder();
+                let interimTranscript = '';
+
+                for (let i = event.resultIndex; i < event.results.length; i++) {
+                    const transcript = event.results[i][0].transcript.trim();
+                    if (!transcript) continue;
+
+                    if (event.results[i].isFinal) {
+                        removeInterimRow();
+                        appendMessage(transcript, getCurrentTime(), false);
                     } else {
-                        led.style.background = '#ffffff';
+                        interimTranscript += transcript;
                     }
-                    setTimeout(function() {
-                        led.classList.remove('flash');
-                        if (isMetroPlaying) {
-                            led.style.background = '#ffffff';
-                        }
-                    }, 40);
                 }
-            }, (time - audioCtx.currentTime) * 1000);
 
-            if (isCountingIn) {
-                countInBeats++;
-                
-                if (countInBeats === 9) {
-                    var playDelay = (time - audioCtx.currentTime) * 1000;
-                    
-                    setTimeout(function() {
-                        if (isCountingIn) {
-                            isCountingIn = false;
-                            countInBeats = 0;
-                            
-                            activeOscillators.forEach(function(activeOsc) {
-                                try { activeOsc.stop(); } catch(e) {}
-                            });
-                            activeOscillators = [];
+                if (interimTranscript) updateInterimMessage(interimTranscript);
+            };
 
-                            if (metroTimer) {
-                                clearTimeout(metroTimer);
-                                metroTimer = null;
-                            }
-                            isMetroPlaying = false;
-
-                            var led = document.getElementById('metroLed');
-                            if (led) {
-                                led.classList.remove('on');
-                                led.classList.remove('flash');
-                                led.style.background = 'rgba(255,255,255,0.4)';
-                            }
-                            
-                            currentBeat = 0; 
-                            
-                            if (player && typeof player.playVideo === 'function') {
-                                player.playVideo();
-                            }
-                        }
-                    }, playDelay);
+            recognition.onerror = event => {
+                console.warn('音声認識エラー:', event.error);
+                const fatalErrors = ['not-allowed', 'service-not-allowed', 'audio-capture'];
+                if (fatalErrors.includes(event.error)) {
+                    shouldRestartRecognition = false;
+                    isStarted = false;
+                    setRecognitionStatus('マイク設定を確認', 'error');
+                    return;
                 }
+                if (event.error === 'network') setRecognitionStatus('通信エラー', 'error');
+                else if (event.error !== 'no-speech') setRecognitionStatus('再接続中', 'starting');
+            };
+
+            recognition.onend = () => {
+                removeInterimRow();
+                if (!shouldRestartRecognition) {
+                    setRecognitionStatus('停止', 'idle');
+                    return;
+                }
+                setRecognitionStatus('再接続中', 'starting');
+                // 即時再起動によるInvalidStateErrorを避ける
+                clearTimeout(restartTimer);
+                restartTimer = setTimeout(startRecognitionSafely, 500);
+            };
+
+            startRecognitionSafely();
+        }
+
+        function startRecognitionSafely() {
+            if (!recognition || !shouldRestartRecognition) return;
+            try {
+                recognition.start();
+            } catch (error) {
+                if (error.name !== 'InvalidStateError') console.error('音声認識開始エラー:', error);
             }
         }
 
-        window.addEventListener('keydown', function(event) {
-            if (document.activeElement.tagName === 'INPUT') return;
-            if (event.repeat) return;
-            
-            switch (event.key) {
-                case ' ':
-                    event.preventDefault();
-                    togglePlay();
-                    break;
-                case 'ArrowLeft':
-                    event.preventDefault();
-                    skip(-10);
-                    break;
-                case 'ArrowRight':
-                    event.preventDefault();
-                    skip(10);
-                    break;
-                case 'a':
-                case 'A':
-                    if (!event.repeat && !pressTimer) startPress('A');
-                    break;
-                case 'b':
-                case 'B':
-                    if (!event.repeat && !pressTimer) startPress('B');
-                    break;
-                case 's':
-                case 'S':
-                    toggleSpeed();
-                    break;
-                case 't':
-                case 'T':
-                    tapBPM();
-                    break;
-                case 'm':
-                case 'M':
-                    toggleMetronome();
-                    break;
-                case 'c':
-                case 'C':
-                    toggleCamera();
-                    break;
-                default:
-                    return;
-            }
-        });
+        function hidePlaceholder() {
+            const placeholder = document.getElementById('timeline-placeholder');
+            if (placeholder) placeholder.style.display = 'none';
+        }
 
-        window.addEventListener('keyup', function(event) {
-            if (document.activeElement.tagName === 'INPUT') return;
-        
-            switch (event.key) {
-                case 'a':
-                case 'A':
-                    endPress('A');
-                    break;
-                case 'b':
-                case 'B':
-                    endPress('B');
-                    break;
-            }
-        });
+        function getCurrentTime() {
+            const now = new Date();
+            return `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+        }
 
-        window.addEventListener('DOMContentLoaded', function() {
-            var storedHistory = localStorage.getItem('yt_lesson_history');
-            if (storedHistory) {
-                try {
-                    videoHistory = JSON.parse(storedHistory);
-                    if (!Array.isArray(videoHistory)) videoHistory = [];
-                    if (videoHistory.length > 0 && typeof videoHistory[0] === 'string') {
-                        videoHistory = [];
-                        localStorage.removeItem('yt_lesson_history');
-                    }
-                } catch(e) {
-                    videoHistory = [];
-                }
+        function updateInterimMessage(text) {
+            if (!interimRow) {
+                interimRow = createMessageRow(text, getCurrentTime(), true);
+                document.getElementById('chat-timeline').appendChild(interimRow);
+            } else {
+                interimRow.querySelector('.chat-bubble').textContent = text;
             }
-            updateHistorySelect();
+            scrollToBottom();
+        }
+
+        function removeInterimRow() {
+            if (interimRow) {
+                interimRow.remove();
+                interimRow = null;
+            }
+        }
+
+        function createMessageRow(text, timeStr, isInterim = false) {
+            const row = document.createElement('div');
+            row.className = 'chat-bubble-row';
+            if (isInterim) row.dataset.interim = 'true';
+
+            const bubble = document.createElement('div');
+            bubble.className = 'chat-bubble family';
+            bubble.textContent = text;
+            bubble.style.opacity = isInterim ? '0.65' : '1';
+
+            const time = document.createElement('div');
+            time.className = 'chat-time';
+            time.textContent = isInterim ? `${timeStr} 認識中...` : timeStr;
+
+            row.append(bubble, time);
+            return row;
+        }
+
+        function appendMessage(text, timeStr) {
+            const timeline = document.getElementById('chat-timeline');
+            timeline.appendChild(createMessageRow(text, timeStr, false));
+            scrollToBottom();
+        }
+
+        function scrollToBottom() {
+            const timeline = document.getElementById('chat-timeline');
+            timeline.scrollTop = timeline.scrollHeight;
+        }
+
+        window.addEventListener('beforeunload', () => {
+            shouldRestartRecognition = false;
+            clearTimeout(restartTimer);
+            try { recognition?.stop(); } catch (_) {}
         });
     </script>
 </body>
